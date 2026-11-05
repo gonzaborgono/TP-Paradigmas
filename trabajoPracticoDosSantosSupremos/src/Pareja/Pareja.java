@@ -23,4 +23,11 @@ public class Pareja {
         combatientes.add(combatiente1);
         combatientes.add(combatiente2);
     }
+
+    public Combatiente getCombatiente1() {
+        return combatientes.getFirst();
+    }
+    public Combatiente getCombatiente2() {
+        return combatientes.getLast();
+    }
 }
