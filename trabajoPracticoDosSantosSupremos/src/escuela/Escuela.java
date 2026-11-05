@@ -18,22 +18,11 @@ public class Escuela {
         this.tecnicas = List.copyOf(tecnicas);
         this.equipamientos = List.copyOf(equipamientos);
     }
-    public void preparar(Combatiente combatiente)
-    {
-        for(Equipamiento equipamiento : equipamientos)
-        {
-            combatiente.equipar(equipamiento);
-        }
-        for(Tecnica tecnica: tecnicas)
-        {
-            combatiente.agregarTecnica(tecnica);
-        }
-    }
+
     public String getNombre()
     {
         return this.nombre;
     }
-
 
     public List<Tecnica> getTecnicas() {
         return tecnicas;
