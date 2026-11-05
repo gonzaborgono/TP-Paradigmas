@@ -13,8 +13,8 @@ public abstract class Equipamiento
 		this.nombre = nombre;
 		this.tipo = tipo;
 	}
-	public abstract void AplicarEfectos(Combatiente combatiente);
-	public abstract void RetirarEfectos(Combatiente combatiente);
+	public abstract void aplicarEfectos(Combatiente combatiente);
+	public abstract void retirarEfectos(Combatiente combatiente);
 	public TipoEquipamiento getTipoEquipamiento()
 	{
 		return tipo;

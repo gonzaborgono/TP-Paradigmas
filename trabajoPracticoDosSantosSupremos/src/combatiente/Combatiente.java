@@ -1,4 +1,6 @@
 package combatiente;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import equipamiento.Equipamiento;
@@ -23,9 +25,9 @@ public abstract class Combatiente
 	private float multDañoRecibido;
 	private float multDañoRealizado;
 	//equipamientos
-	private List<Equipamiento> equipamientos;
+	private List<Equipamiento> equipamientos = new ArrayList<Equipamiento>();
 	//tecnicas
-	private Map<Tecnica, Integer> tecnicas;
+	private Map<Tecnica, Integer> tecnicas = new HashMap<Tecnica, Integer>();
 	
 	public Combatiente(String nombre, float vidaMax, float energiaMax, float multDañoRecibido, float multmultDañoRealizado)
 	{
@@ -46,94 +48,107 @@ public abstract class Combatiente
 		this.energiaMax = energiaMax;
 		this.multDañoRealizado = multmultDañoRealizado;
 		this.multDañoRecibido = multDañoRecibido;
-		//no pongo aca vida y energia actuales porque antes de cada combate se deberian iniciar solos
-		//asi que si equipo algo dps de crear, los voy a escribir para modificarlos
+		this.vidaAct = this.vidaMax;
+		this.energiaAct = this.energiaMax;
 	}
 	//modificar vidaMax
 	public void aumentarVidaMax(float aumento)
-	{
-		if(aumento <= 0)
-			throw new IllegalArgumentException("el aumento no puede ser negativo o 0");
-		this.vidaMax*=aumento;
-	}
-	public void decrementarVidaMax(float disminucion)
-	{
-		if(disminucion <= 0)
-			throw new IllegalArgumentException("la disminucion no puede ser negativa o 0");
-		this.vidaMax/=disminucion;
-		if(this.vidaAct > this.vidaMax)
-			this.vidaAct = this.vidaMax;
-	}
-	//modificar vida actual
-	public void aumentarVida(float aumento)
-	{
-		if(aumento <= 0)
-			throw new IllegalArgumentException("el aumento no puede ser negativo o 0");
-		this.vidaAct+=aumento;
-	}
-	public void decrementarVida(float disminucion)
-	{
-		if(disminucion <= 0)
-			throw new IllegalArgumentException("la disminucion no puede ser negativa o 0");
-		this.vidaAct-=disminucion;
-	}
+    {
+        if(aumento <= 0)
+            throw new IllegalArgumentException("El aumento no puede ser negativo o 0");
+        this.vidaMax *= aumento;
+    }
+    
+    public void decrementarVidaMax(float disminucion)
+    {
+        if(disminucion <= 0)
+            throw new IllegalArgumentException("La disminución no puede ser negativa o 0");
+        this.vidaMax /= disminucion;
+        if(this.vidaAct > this.vidaMax)
+            this.vidaAct = this.vidaMax;
+    }
+    //modificar vida
+    public void aumentarVida(float aumento)
+    {
+        if(aumento <= 0)
+            throw new IllegalArgumentException("El aumento no puede ser negativo o 0");
+        this.vidaAct += aumento;
+        if(this.vidaAct > this.vidaMax)
+            this.vidaAct = this.vidaMax;
+    }
+    
+    public void decrementarVida(float disminucion)
+    {
+        if(disminucion <= 0)
+            throw new IllegalArgumentException("La disminución no puede ser negativa o 0");
+        this.vidaAct -= disminucion;
+        if(this.vidaAct < 0)
+            this.vidaAct = 0;
+    }
 	
 	//modificar energia max
-	public void aumentarEnergiaMax(float aumento)
-	{
-		if(aumento <= 0)
-			throw new IllegalArgumentException("el aumento no puede ser negativo o 0");
-		this.energiaMax*=aumento;
-	}
-	public void decrementarEnergiaMax(float disminucion)
-	{
-		if(disminucion <= 0)
-			throw new IllegalArgumentException("la disminucion no puede ser negativa o 0");
-		this.energiaMax/=disminucion;
-		if(this.energiaMax > this.energiaMax)
-			this.energiaMax = this.energiaMax;
-	}
-	//modificar energia actual
-	public void aumentarEnergia(float aumento)
-	{
-		if(aumento <= 0)
-			throw new IllegalArgumentException("el aumento no puede ser negativo o 0");
-		this.energiaAct+=aumento;
-	}
-	public void decrementarEnergia(float disminucion)
-	{
-		if(disminucion <= 0)
-			throw new IllegalArgumentException("la disminucion no puede ser negativa o 0");
-		this.energiaAct-=disminucion;
-	}
+    public void aumentarEnergiaMax(float aumento)
+    {
+        if(aumento <= 0)
+            throw new IllegalArgumentException("El aumento no puede ser negativo o 0");
+        this.energiaMax *= aumento;
+    }
+    
+    public void decrementarEnergiaMax(float disminucion)
+    {
+        if(disminucion <= 0)
+            throw new IllegalArgumentException("La disminución no puede ser negativa o 0");
+        this.energiaMax /= disminucion;
+        if(this.energiaAct > this.energiaMax)
+            this.energiaAct = this.energiaMax;
+    }
+    //modificar energia
+    public void aumentarEnergia(float aumento)
+    {
+        if(aumento <= 0)
+            throw new IllegalArgumentException("El aumento no puede ser negativo o 0");
+        this.energiaAct += aumento;
+        if(this.energiaAct > this.energiaMax)
+            this.energiaAct = this.energiaMax;
+    }
+    
+    public void decrementarEnergia(float disminucion)
+    {
+        if(disminucion <= 0)
+            throw new IllegalArgumentException("El aumento no puede ser negativo o 0");
+        this.energiaAct -= disminucion;
+        if(this.energiaAct < 0)
+            this.energiaAct = 0;
+    }
 	
 	//multiplicador de daño recibido (acordarse de que es un multiplicador)
-	public void aumentarMultDañoRecibido(float aumento)
-	{
-		if(aumento <= 0)
-			throw new IllegalArgumentException("el aumento no puede ser negativo o 0");
-		this.multDañoRecibido+=aumento;
-	}
-	public void disminuirMultDañoRecibido(float disminucion)
-	{
-		if(disminucion <= 0)
-			throw new IllegalArgumentException("la disminucion no puede ser negativa o 0");
-		this.multDañoRecibido-=disminucion;
-	}
-	
-	//multiplicador daño realizado (acordarse que es un multiplicador)
-	public void aumentarMultDañoRealizado(float aumento)
-	{
-		if(aumento <= 0)
-			throw new IllegalArgumentException("el aumento no puede ser negativo o 0");
-		this.multDañoRealizado+=aumento;
-	}
-	public void disminuirMultDañoRealizado(float disminucion)
-	{
-		if(disminucion <= 0)
-			throw new IllegalArgumentException("la disminucion no puede ser negativa o 0");
-		this.multDañoRealizado-=disminucion;
-	}
+    public void aumentarMultDañoRecibido(float aumento)
+    {
+        if(aumento <= 0)
+            throw new IllegalArgumentException("El aumento no puede ser negativo o 0");
+        this.multDañoRecibido += aumento;
+    }
+    
+    public void disminuirMultDañoRecibido(float disminucion)
+    {
+        if(disminucion <= 0)
+            throw new IllegalArgumentException("La disminución no puede ser negativa o 0");
+        this.multDañoRecibido -= disminucion;
+    }
+    
+    public void aumentarMultDañoRealizado(float aumento)
+    {
+        if(aumento <= 0)
+            throw new IllegalArgumentException("El aumento no puede ser negativo o 0");
+        this.multDañoRealizado += aumento;
+    }
+  //multiplicador de daño realizado (acordarse de que es un multiplicador)
+    public void disminuirMultDañoRealizado(float disminucion)
+    {
+        if(disminucion <= 0)
+            throw new IllegalArgumentException("La disminución no puede ser negativa o 0");
+        this.multDañoRealizado -= disminucion;
+    }
 
 	//equipamiento
 	private boolean hayDelMismoTipo(Equipamiento nuevo)
@@ -153,19 +168,19 @@ public abstract class Combatiente
 	}
 	public void equipar(Equipamiento nuevoEquipamiento)
 	{
-		if(HayDelMismoTipo(nuevoEquipamiento))
+		if(hayDelMismoTipo(nuevoEquipamiento))
 			throw new IllegalStateException("ya hay un equipamiento de ese tipo equipado");
-		if(!QuedaEspacioEquipamiento())
+		if(!quedaEspacioEquipamiento())
 			throw new IllegalStateException("ya se llego al limite de equipamientos permitidos");
 		equipamientos.add(nuevoEquipamiento);
-		nuevoEquipamiento.AplicarEfectos(this);
+		nuevoEquipamiento.aplicarEfectos(this);
 	}
 	public void desequipar(Equipamiento sacarEquipamiento)
 	{
 		if(!equipamientos.contains(sacarEquipamiento))
 			throw new IllegalArgumentException("el combatiente no tiene el equipamiento que se quiere sacar");
 		equipamientos.remove(sacarEquipamiento);
-		sacarEquipamiento.RetirarEfectos(this);
+		sacarEquipamiento.retirarEfectos(this);
 	}
 	
 	//tecnicas
@@ -177,5 +192,18 @@ public abstract class Combatiente
 			throw new IllegalStateException("el combatiente ya posee esta tecnica");
 		tecnicas.put(nuevaTecnica, usosTecnicasPorTorneo);
 	}
+	
+	//solo valida por id
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Combatiente that = (Combatiente) obj;
+        return ID == that.ID;
+    }
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(ID);
+    }
 	
 }
