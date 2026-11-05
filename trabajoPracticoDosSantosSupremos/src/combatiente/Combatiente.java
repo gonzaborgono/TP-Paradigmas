@@ -160,7 +160,7 @@ public abstract class Combatiente
 		equipamientos.add(nuevoEquipamiento);
 		nuevoEquipamiento.AplicarEfectos(this);
 	}
-	public void Desquipar(Equipamiento sacarEquipamiento)
+	public void Desequipar(Equipamiento sacarEquipamiento)
 	{
 		if(!equipamientos.contains(sacarEquipamiento))
 			throw new IllegalArgumentException("el combatiente no tiene el equipamiento que se quiere sacar");
