@@ -54,13 +54,13 @@ public abstract class Combatiente
 	{
 		if(aumento <= 0)
 			throw new IllegalArgumentException("el aumento no puede ser negativo o 0");
-		this.vidaMax+=aumento;
+		this.vidaMax*=aumento;
 	}
 	public void decrementarVidaMax(float disminucion)
 	{
 		if(disminucion <= 0)
 			throw new IllegalArgumentException("la disminucion no puede ser negativa o 0");
-		this.vidaMax-=disminucion;
+		this.vidaMax/=disminucion;
 		if(this.vidaAct > this.vidaMax)
 			this.vidaAct = this.vidaMax;
 	}
@@ -83,13 +83,13 @@ public abstract class Combatiente
 	{
 		if(aumento <= 0)
 			throw new IllegalArgumentException("el aumento no puede ser negativo o 0");
-		this.energiaMax+=aumento;
+		this.energiaMax*=aumento;
 	}
 	public void decrementarEnergiaMax(float disminucion)
 	{
 		if(disminucion <= 0)
 			throw new IllegalArgumentException("la disminucion no puede ser negativa o 0");
-		this.energiaMax-=disminucion;
+		this.energiaMax/=disminucion;
 		if(this.energiaMax > this.energiaMax)
 			this.energiaMax = this.energiaMax;
 	}
