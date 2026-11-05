@@ -24,12 +24,13 @@ public abstract class Combatiente
 	//daño
 	private float multDañoRecibido;
 	private float multDañoRealizado;
+	private float multGastoEnergia;
 	//equipamientos
 	private List<Equipamiento> equipamientos = new ArrayList<Equipamiento>();
 	//tecnicas
 	private Map<Tecnica, Integer> tecnicas = new HashMap<Tecnica, Integer>();
 	
-	public Combatiente(String nombre, float vidaMax, float energiaMax, float multDañoRecibido, float multmultDañoRealizado)
+	public Combatiente(String nombre, float vidaMax, float energiaMax, float multDañoRecibido, float multmultDañoRealizado, float multGastoEnergia)
 	{
 		if(vidaMax <= 0)
 			throw new IllegalArgumentException("la vida no puede ser negativa o 0");
@@ -41,6 +42,9 @@ public abstract class Combatiente
 			throw new IllegalArgumentException("el mutiplicador de daño realizado no puede ser negativo o 0");
 		if(nombre.length() == 0)
 			throw new IllegalArgumentException("el combatiente debe tener un nombre");
+		if(multGastoEnergia <= 0)
+			throw new IllegalArgumentException("el mutiplicador de gasto de energia no puede ser negativo o 0");
+		
 		this.ID = this.proxID;
 		this.proxID++;
 		this.nombre = nombre;
@@ -50,6 +54,7 @@ public abstract class Combatiente
 		this.multDañoRecibido = multDañoRecibido;
 		this.vidaAct = this.vidaMax;
 		this.energiaAct = this.energiaMax;
+		this.multGastoEnergia = multGastoEnergia;
 	}
 	//modificar vidaMax
 	public void aumentarVidaMax(float aumento)
