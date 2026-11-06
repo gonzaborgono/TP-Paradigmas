@@ -243,4 +243,13 @@ public abstract class Combatiente
         return Integer.hashCode(ID);
     }
 	
+    public void resetearEstado()
+    {
+    	this.vidaAct = this.vidaMax;
+    	this.energiaAct = this.energiaMax;
+    }
+    public boolean estaFueraDeCombate()
+    {
+    	return this.vidaAct == 0;
+    }
 }

@@ -19,7 +19,7 @@ public abstract class Equipamiento
 	{
 		return tipo;
 	}
-	public String nombre()
+	public String getNombre()
 	{
 		return nombre;
 	}
