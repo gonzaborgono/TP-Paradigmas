@@ -141,13 +141,14 @@ public abstract class Combatiente
         this.multDañoRecibido -= disminucion;
     }
     
+    //multiplicador de daño realizado (acordarse de que es un multiplicador)
     public void aumentarMultDañoRealizado(float aumento)
     {
         if(aumento <= 0)
             throw new IllegalArgumentException("El aumento no puede ser negativo o 0");
         this.multDañoRealizado += aumento;
     }
-  //multiplicador de daño realizado (acordarse de que es un multiplicador)
+  
     public void disminuirMultDañoRealizado(float disminucion)
     {
         if(disminucion <= 0)
@@ -155,6 +156,21 @@ public abstract class Combatiente
         this.multDañoRealizado -= disminucion;
     }
 
+    //multiplicador de energia gastada
+    public void aumentarMultGastoEnergia(float aumento)
+    {
+        if(aumento <= 0)
+            throw new IllegalArgumentException("El aumento no puede ser negativo o 0");
+        this.multGastoEnergia += aumento;
+    }
+  
+    public void disminuirMultGastoEnergia(float disminucion)
+    {
+        if(disminucion <= 0)
+            throw new IllegalArgumentException("La disminución no puede ser negativa o 0");
+        this.multGastoEnergia -= disminucion;
+    }
+    
 	//equipamiento
 	private boolean hayDelMismoTipo(Equipamiento nuevo)
 	{

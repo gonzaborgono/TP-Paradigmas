@@ -11,7 +11,7 @@ public class Pareja {
     private List<Combatiente> combatientes;
     Pareja(Combatiente combatiente1, Combatiente combatiente2)
     {
-        if(combatiente1 == null && combatiente2 == null)
+        if(combatiente1 == null || combatiente2 == null)
             throw new IllegalArgumentException("La pareja necesita dos combatientes");
 
         if(combatiente1.equals(combatiente2))
