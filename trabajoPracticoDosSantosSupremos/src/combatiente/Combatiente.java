@@ -56,6 +56,9 @@ public abstract class Combatiente
 		this.energiaAct = this.energiaMax;
 		this.multGastoEnergia = multGastoEnergia;
 	}
+	
+	//metodos con disminuir trabajan con multiplicadores/porcentajes
+	//decrementar trabajan con valores totales
 	//modificar vidaMax
 	public void aumentarVidaMax(float aumento)
     {
@@ -64,7 +67,7 @@ public abstract class Combatiente
         this.vidaMax *= aumento;
     }
     
-    public void decrementarVidaMax(float disminucion)
+    public void disminuirVidaMax(float disminucion)
     {
         if(disminucion <= 0)
             throw new IllegalArgumentException("La disminución no puede ser negativa o 0");
@@ -99,7 +102,7 @@ public abstract class Combatiente
         this.energiaMax *= aumento;
     }
     
-    public void decrementarEnergiaMax(float disminucion)
+    public void disminuirEnergiaMax(float disminucion)
     {
         if(disminucion <= 0)
             throw new IllegalArgumentException("La disminución no puede ser negativa o 0");
@@ -214,6 +217,19 @@ public abstract class Combatiente
 		tecnicas.put(nuevaTecnica, usosTecnicasPorTorneo);
 	}
 	
+	//metodos para trabajar con info final, dps de aplicar modificadores
+	public void recibirDaño(float daño)
+	{
+		this.decrementarVida(daño * this.multDañoRecibido);
+	}
+	public float calcularDañoRealizado(float daño)
+	{
+		return daño * this.multDañoRealizado;
+	}
+	public void perderEnergia(float perdida)
+	{
+		this.decrementarEnergia(perdida * this.multGastoEnergia);
+	}
 	//solo valida por id
     @Override
     public boolean equals(Object obj) {
