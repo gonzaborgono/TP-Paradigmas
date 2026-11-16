@@ -15,6 +15,7 @@ public class CorteDeLosMilAmaneceres extends Tecnica
 	public void ejecutar(Combatiente ejecutor, Combatiente objetivo) 
 	{
 		ejecutor.gastarEnergia(this.getCostoEnergia());
-		objetivo.recibirDano(45);
+		int dano = ejecutor.calcularDanoRealizado(45);
+		objetivo.recibirDano(dano);
 	}
 }

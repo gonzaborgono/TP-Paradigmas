@@ -1,7 +1,7 @@
 package implementacionTecnicas;
+import combatiente.Combatiente;
 import tecnica.Tecnica;
 import tecnica.TipoTecnica;
-import combatiente.Combatiente;
 public class DominioDeLaNada extends Tecnica
 {
 
@@ -14,7 +14,8 @@ public class DominioDeLaNada extends Tecnica
 	public void ejecutar(Combatiente ejecutor, Combatiente objetivo) 
 	{
 		ejecutor.gastarEnergia(getCostoEnergia());
-		objetivo.recibirDano(30);
+		int dano = ejecutor.calcularDanoRealizado(30);
+		objetivo.recibirDano(dano);
 		objetivo.disminuirEnergiaAct(20);
 	}
 

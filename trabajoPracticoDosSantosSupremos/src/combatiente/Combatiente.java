@@ -163,6 +163,10 @@ public abstract class Combatiente implements Comparable<Combatiente>
         {
             throw new IllegalStateException("El combatiente ya posee esta técnica.");
         }
+        if (nuevaTecnica == this.basico)
+        {
+            throw new IllegalArgumentException("La técnica no puede ser el ataque basico.");
+        }
         tecnicas.put(nuevaTecnica, USOS_TECNICAS_POR_TORNEO);
         ordenAprendidas.add(nuevaTecnica);
     }

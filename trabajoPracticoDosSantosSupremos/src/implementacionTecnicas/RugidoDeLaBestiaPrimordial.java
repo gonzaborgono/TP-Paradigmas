@@ -16,7 +16,8 @@ public class RugidoDeLaBestiaPrimordial extends Tecnica
 	public void ejecutar(Combatiente ejecutor, Combatiente objetivo) 
 	{
 		ejecutor.gastarEnergia(getCostoEnergia());
-		objetivo.recibirDano(65);
+		int dano = ejecutor.calcularDanoRealizado(65);
+		objetivo.recibirDano(dano);
 	}
 
 }

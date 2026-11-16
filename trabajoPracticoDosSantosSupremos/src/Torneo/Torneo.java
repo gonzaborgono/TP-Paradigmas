@@ -112,6 +112,9 @@ public class Torneo
 
     private void notificarProclamacion(Pareja campeona) 
     {
-        //a desarrollar sistema para avisar eventos
+        for (ObservadorTorneo o : observadores)
+        {
+            o.recibirEvento(new EventoProclamacion(campeona));
+        }
     }
 }

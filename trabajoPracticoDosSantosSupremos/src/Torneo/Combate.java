@@ -42,7 +42,8 @@ public class Combate
     public Pareja desarrollarCombate() 
     {
         resetearEstadoCombatientes();
-        //hacer notificacion de inicio de pelea y avisar evento
+        //avisar inicio de combate
+        notificarEvento(new EventoInicioCombate(pareja1, pareja2));
 
         //hacer que peleen hasta que una pareja cae o se llegue al limite de asaltos
         while (!pareja1.estaDerrotada() && !pareja2.estaDerrotada() && asaltoActual < LIMITE_ASALTOS_DEFAULT) 
@@ -53,7 +54,12 @@ public class Combate
         }
 
         Pareja ganadora = determinarGanadora();
-        //avisar ganador como evento
+        Pareja perdedora;
+        if(pareja1.equals(ganadora))
+            perdedora = pareja2;
+        else
+            perdedora = pareja1;
+        notificarEvento(EventoResultadoCombate(ganadora, perdedora, ganadora.getVidaTotal(), perdedora.getVidaTotal()));
 
         return ganadora;
     }
@@ -149,11 +155,11 @@ public class Combate
             ejecutor.usarTecnica(tecnicaElegida);
             this.registroUsosCompa.get(ejecutor).add(tecnicaElegida);
 
-            //notificar evento de accion realizada
+            notificarEvento(new EventoAccionRealizada(ejecutor, objetivo, tecnicaElegida));
 
             if (vidaAntes > 0 && objetivo.estaFueraDeCombate()) //solo avisar eliminacion si antes de atacar estaba vivo y ahora esta muerto
             {
-                //notificar evento de eliminacion
+                notificarEvento(new EventoEliminacion(objetivo));
             }
         } 
         else 
@@ -166,11 +172,11 @@ public class Combate
             ejecutor.getBasico().ejecutar(ejecutor, objetivo);
 
 
-            //notificar accion realizada
+            notificarEvento(new EventoAccionRealizada(ejecutor, objetivo, tecnicaElegida));
 
             if (vidaAntes > 0 && objetivo.estaFueraDeCombate()) 
             {
-                //notificar eliminacion
+                notificarEvento(new EventoEliminacion(objetivo));
             }
         }
     }
