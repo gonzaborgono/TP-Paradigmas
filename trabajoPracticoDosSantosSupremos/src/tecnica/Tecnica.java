@@ -2,7 +2,7 @@ package tecnica;
 
 import combatiente.Combatiente;
 
-public abstract class Tecnica implements Accion 
+public abstract class Tecnica
 {
     private final String nombre;
     private final int costoEnergia;
@@ -30,7 +30,6 @@ public abstract class Tecnica implements Accion
         return tipo;
     }
 
-    @Override
     public abstract void ejecutar(Combatiente ejecutor, Combatiente objetivo);
 
     @Override 

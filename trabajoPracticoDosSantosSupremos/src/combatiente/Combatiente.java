@@ -1,12 +1,11 @@
 package combatiente;
+import equipamiento.Equipamiento;
+import implementacionTecnicas.AtaqueBasico;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import equipamiento.Equipamiento;
-import implementacionTecnicas.AtaqueBasico;
 import tecnica.Tecnica;
 public abstract class Combatiente implements Comparable<Combatiente>
 {
@@ -30,6 +29,8 @@ public abstract class Combatiente implements Comparable<Combatiente>
     private boolean defensaActiva;
     private double multDefensaTemporal = 1.0;
     private AtaqueBasico basico = new AtaqueBasico();
+    //atributo para controlar el bonus al caer compañero
+    private boolean reaccionActiva;
     public Combatiente(String nombre, int vidaMax, int energiaMax, double multDanoRecibido, double multDanoRealizado, double multGastoEnergia) {
         if (nombre == null || nombre.trim().isEmpty()) 
         {
@@ -70,6 +71,7 @@ public abstract class Combatiente implements Comparable<Combatiente>
         this.ordenAprendidas = new ArrayList<Tecnica>();
         this.tecnicas = new HashMap<Tecnica, Integer>();
         this.defensaActiva = false;
+        this.reaccionActiva = false;
     }
     public AtaqueBasico getBasico()
     {
@@ -100,9 +102,26 @@ public abstract class Combatiente implements Comparable<Combatiente>
         this.vidaAct = this.vidaMax;
         this.energiaAct = this.energiaMax;
         this.defensaActiva = false;
+        if(this.reaccionActiva) //si reacciono en el ultimo combate, pierde el boost
+            acomodarFinCompaneroFueraDeCombate();
+        
         this.multDefensaTemporal = 1.0;
     }
-
+    //reaccion (es abstracta pq depende de cada tipo de combatiente)
+    public abstract void reaccionarCompaneroFueraDeCombate();
+    public abstract void acomodarFinCompaneroFueraDeCombate();
+    public boolean tieneReaccionActiva()
+    {
+        return reaccionActiva;
+    }
+    protected void activarReaccion()
+    {
+        this.reaccionActiva = true;
+    }
+    protected void desactivarReaccion()
+    {
+        this.reaccionActiva = false;
+    }
     public boolean estaFueraDeCombate() 
     {
         return this.vidaAct <= 0;
@@ -400,7 +419,7 @@ public abstract class Combatiente implements Comparable<Combatiente>
     		throw new IllegalArgumentException("la tecnica ya no tiene usos");
     	tecnicas.put(tecnica, usos-1);
     }
-    
+    @Override
     public int compareTo(Combatiente otro)
     {
     	return this.id - otro.id;

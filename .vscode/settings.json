@@ -6,11 +6,17 @@
         "Anillo",
         "aplicar",
         "Combatiente",
+        "cronista",
+        "descripcion",
         "Efecto",
         "Equipamiento",
         "Espiritual",
+        "Evento",
+        "fecha",
         "implementacion",
         "retirar",
-        "Tipo"
+        "Secta",
+        "Tipo",
+        "Torneo"
     ]
 }

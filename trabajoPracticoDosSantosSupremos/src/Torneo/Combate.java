@@ -141,43 +141,46 @@ public class Combate
 
     private void realizarAccionIndividual(Combatiente ejecutor, Pareja parejaPropia, Pareja parejaRival) 
     {
-    	//para ya tener compañero y que tecnica va a usar
         Combatiente companero = obtenerCompanero(ejecutor, parejaPropia);
         Tecnica tecnicaElegida = seleccionarTecnicaSegunCriterio(ejecutor, companero);
+        //si no encontro tecnica para usar usa el ataque basico
+        boolean esTecnicaDeEscuela = (tecnicaElegida != null);
         
-        if (tecnicaElegida != null) 
+        if (!esTecnicaDeEscuela) //si no es tecnica de escual entonces elige el basico
         {
-        	//elegir objetivo
-            Combatiente objetivo = determinarObjetivoTecnica(tecnicaElegida, ejecutor, parejaRival);
-            int vidaAntes = objetivo.getVidaAct();
-            
-            tecnicaElegida.ejecutar(ejecutor, objetivo);
+            tecnicaElegida = ejecutor.getBasico();
+        }
+        //buscar objetivo, si es defensiva o curativa si mismo, sino el rival con menos vida o por ID
+        Combatiente objetivo = determinarObjetivoTecnica(tecnicaElegida, ejecutor, parejaRival);
+        //tomar vida para saber si mato al objetivo o no
+        int vidaAntes = objetivo.getVidaAct();
+        //hacer la tecnica
+        tecnicaElegida.ejecutar(ejecutor, objetivo);
+        //si era una tecnica de escuela, marcar que uso la tecnica en sus totales por torneo
+        //y en este combate para que su compañero no pueda usarla
+        if (esTecnicaDeEscuela) 
+        {
             ejecutor.usarTecnica(tecnicaElegida);
             this.registroUsosCompa.get(ejecutor).add(tecnicaElegida);
+        }
 
-            notificarEvento(new EventoAccionRealizada(ejecutor, objetivo, tecnicaElegida));
+        notificarEvento(new EventoAccionRealizada(ejecutor, objetivo, tecnicaElegida));
 
-            if (vidaAntes > 0 && objetivo.estaFueraDeCombate()) //solo avisar eliminacion si antes de atacar estaba vivo y ahora esta muerto
-            {
-                notificarEvento(new EventoEliminacion(objetivo));
-            }
-        } 
-        else 
+        //si antes estaba vivo y ahora ya no, lo mato en este ataque
+        if (vidaAntes > 0 && objetivo.estaFueraDeCombate()) 
         {
-        	//mismo que arriba, elegir objetivo
-            Combatiente objetivo = elegirObjetivoRival(parejaRival);
-            int vidaAntes = objetivo.getVidaAct();
-
-            //pedir el basico del ejecutor y hacerlo
-            ejecutor.getBasico().ejecutar(ejecutor, objetivo);
-
-
-            notificarEvento(new EventoAccionRealizada(ejecutor, objetivo, ejecutor.getBasico()));
-
-            if (vidaAntes > 0 && objetivo.estaFueraDeCombate()) 
+            notificarEvento(new EventoEliminacion(objetivo));
+            //si lo mato, avisar al compañero, si esta tivo, para que active su boost de 1 turno
+            Combatiente companeroDelCaido = obtenerCompanero(objetivo, parejaRival);
+            if (!companeroDelCaido.estaFueraDeCombate()) 
             {
-                notificarEvento(new EventoEliminacion(objetivo));
+                companeroDelCaido.reaccionarCompaneroFueraDeCombate();
             }
+        }
+        //si el que ataco tiene el boost de compañero caido activo, desactivarlo ahora que ataco
+        if (ejecutor.tieneReaccionActiva()) 
+        {
+            ejecutor.acomodarFinCompaneroFueraDeCombate();
         }
     }
 
