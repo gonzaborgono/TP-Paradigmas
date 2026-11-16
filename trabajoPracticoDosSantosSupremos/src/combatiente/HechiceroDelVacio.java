@@ -13,7 +13,7 @@ public class HechiceroDelVacio extends Combatiente{
          * multDañoRealizado: 1.0f (Daño normal)
          * multGastoEnergia: 0.50f (Tecnicas cuestan un 50% menos)
          */
-        super(nombre, 70f, 60f, 1.0f, 1.0f, 0.50f);
+        super(nombre, 70, 60, 1.0f, 1.0f, 0.50f);
     }
 
 }

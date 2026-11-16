@@ -13,6 +13,6 @@ public class MonjeDelCuerpoCelestial extends Combatiente{
          * multDañoRealizado: 1.0f (Daño normal)
          * multGastoEnergia: 1.0f (Gasto normal)
          */
-        super(nombre, 130f, 30f, 0.70f, 1.0f, 1.0f);
+        super(nombre, 130, 30, 0.70f, 1.0f, 1.0f);
     }
 }

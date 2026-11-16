@@ -7,13 +7,13 @@ public class CultivadorDeLaEspada extends Combatiente{
 
 	public CultivadorDeLaEspada(String nombre) {
 		/*
-		 * vidaMax: 100f (Vida estandar)
-		 * energiaMax: 40f (Energía estandar)
+		 * vidaMax: 100 (Vida estandar)
+		 * energiaMax: 40 (Energía estandar)
 		 * multDañoRecibido: 1.0f (Daño normal)
 		 * multDañoRealizado: 1.30f (Aumenta el daño un 30%)
 		 * multGastoEnergia: 1.0f (Gasto normal)
 		 */
-		super(nombre, 100f, 40f, 1.0f, 1.30f, 1.0f);
+		super(nombre, 100, 40, 1.0f, 1.30f, 1.0f);
 	}
 
 }

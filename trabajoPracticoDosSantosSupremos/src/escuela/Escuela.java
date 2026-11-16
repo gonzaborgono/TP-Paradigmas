@@ -1,13 +1,13 @@
 package escuela;
 
-import combatiente.Combatiente;
+
 import equipamiento.Equipamiento;
-import equipamiento.TipoEquipamiento;
 import tecnica.Tecnica;
 
 import java.util.List;
 
-public class Escuela {
+public class Escuela 
+{
     private final String  nombre;
     private final List<Tecnica> tecnicas;
     private final List<Equipamiento> equipamientos;

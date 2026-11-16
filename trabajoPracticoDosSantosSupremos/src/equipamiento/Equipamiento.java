@@ -1,6 +1,6 @@
 package equipamiento;
 import combatiente.Combatiente;
-import equipamiento.TipoEquipamiento;
+
 //clase no final, solo referencia para poder hacer combatiente
 public abstract class Equipamiento 
 {
@@ -13,8 +13,8 @@ public abstract class Equipamiento
 		this.nombre = nombre;
 		this.tipo = tipo;
 	}
-	public abstract void aplicarEfectos(Combatiente combatiente);
-	public abstract void retirarEfectos(Combatiente combatiente);
+	public abstract void aplicarEfecto(Combatiente combatiente);
+	public abstract void retirarEfecto(Combatiente combatiente);
 	public TipoEquipamiento getTipoEquipamiento()
 	{
 		return tipo;
