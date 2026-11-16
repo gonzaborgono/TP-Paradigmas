@@ -59,7 +59,7 @@ public class Combate
             perdedora = pareja2;
         else
             perdedora = pareja1;
-        notificarEvento(EventoResultadoCombate(ganadora, perdedora, ganadora.getVidaTotal(), perdedora.getVidaTotal()));
+        notificarEvento(new EventoResultadoCombate(ganadora, perdedora, ganadora.getVidaTotal(), perdedora.getVidaTotal()));
 
         return ganadora;
     }

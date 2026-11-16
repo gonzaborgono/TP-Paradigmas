@@ -1,4 +1,4 @@
-package tecnica;
+package implementacionTecnicas;
 
 import combatiente.Combatiente;
 import tecnica.Tecnica;

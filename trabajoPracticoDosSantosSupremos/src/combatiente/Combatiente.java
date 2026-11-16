@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import equipamiento.Equipamiento;
-import tecnica.AtaqueBasico;
+import implementacionTecnicas.AtaqueBasico;
 import tecnica.Tecnica;
 public abstract class Combatiente implements Comparable<Combatiente>
 {

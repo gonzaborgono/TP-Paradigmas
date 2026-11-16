@@ -1,9 +1,8 @@
-package implementacionCombatientes;
-import combatiente.Combatiente;
+package combatiente;
 import equipamiento.Equipamiento;
 import escuela.Escuela;
+import implementacionCombatientes.*;
 import tecnica.Tecnica;
-
 
 public class CreadorCombatientes {
     public Combatiente crear(String tipo, String nombre, Escuela escuela) {
