@@ -8,7 +8,7 @@ import java.util.Objects;
 public class Pareja {
     private final int ID;
     private List<Combatiente> combatientes;
-    Pareja(int ID, Combatiente combatiente1, Combatiente combatiente2)
+    public Pareja(int ID, Combatiente combatiente1, Combatiente combatiente2)
     {
         if(combatiente1 == null || combatiente2 == null)
             throw new IllegalArgumentException("La pareja necesita dos combatientes");

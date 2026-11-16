@@ -20,8 +20,8 @@ public class Combate
     private int asaltoActual;
     private List<ObservadorTorneo> observadores;
     private Map<Combatiente, Set<Tecnica>> registroUsosCompa; //tiene cada combatiente y el set de tecnicas que uso en este combate, ahi busca el compañero para no repetir
-
-    public Combate(Pareja pareja1, Pareja pareja2, List<ObservadorTorneo> observadores) 
+    private int ronda;
+    public Combate(int ronda, Pareja pareja1, Pareja pareja2, List<ObservadorTorneo> observadores) 
     {
         if (pareja1 == null || pareja2 == null) 
         {
@@ -31,7 +31,7 @@ public class Combate
         {
             throw new IllegalArgumentException("Una pareja no puede combatir contra sí misma.");
         }
-
+        this.ronda = ronda;
         this.pareja1 = pareja1;
         this.pareja2 = pareja2;
         this.asaltoActual = 0;
@@ -59,7 +59,7 @@ public class Combate
             perdedora = pareja2;
         else
             perdedora = pareja1;
-        notificarEvento(new EventoResultadoCombate(ganadora, perdedora, ganadora.getVidaTotal(), perdedora.getVidaTotal()));
+        notificarEvento(new EventoResultadoCombate(ronda, ganadora, perdedora, ganadora.getVidaTotal(), perdedora.getVidaTotal()));
 
         return ganadora;
     }
@@ -84,8 +84,8 @@ public class Combate
         }
         else
         {
-        	primera = pareja1;
-        	segunda = pareja2;
+        	primera = pareja2;
+        	segunda = pareja1;
         }
         	
         ejecutarTurnoPareja(primera, segunda);
@@ -172,7 +172,7 @@ public class Combate
             ejecutor.getBasico().ejecutar(ejecutor, objetivo);
 
 
-            notificarEvento(new EventoAccionRealizada(ejecutor, objetivo, tecnicaElegida));
+            notificarEvento(new EventoAccionRealizada(ejecutor, objetivo, ejecutor.getBasico()));
 
             if (vidaAntes > 0 && objetivo.estaFueraDeCombate()) 
             {
@@ -234,12 +234,10 @@ public class Combate
 
     private Tecnica buscarPrimeraDisponible(Combatiente ejecutor, Combatiente companero, TipoTecnica tipo) 
     {
-    	//pide todas las tecnicas del ejecutor e itera buscando la que pueda usar
-        for (Map.Entry<Tecnica, Integer> entry : ejecutor.getTecnicas().entrySet()) 
+        //pide todas al ejecutor y hace la primera que pueda hacer del tipo
+        for (Tecnica t : ejecutor.getOrdenAprendidas()) 
         {
-            Tecnica t = entry.getKey();
-            int usos = entry.getValue();
-            //si es del tipo que busca y la puede usar, usa esa
+            int usos = ejecutor.getTecnicas().get(t);
             if (t.getTipo() == tipo && puedeUsarTecnica(ejecutor, companero, t, usos)) 
             {
                 return t;

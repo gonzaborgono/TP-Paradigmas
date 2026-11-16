@@ -82,21 +82,21 @@ public class Torneo
 
         //copiar lista para no borrar original
         List<Pareja> rondaActual = new ArrayList<>(this.parejas);
-
+        int ronda = 1;
         //mete en siguienteRonda la pareja que gana el combate, dps toma de este array para hacer el combate
         while (rondaActual.size() > 1) 
         {
             List<Pareja> siguienteRonda = new ArrayList<>();
-
+            
             //avanzamos de a 2 para hacer cruces de a 2, tipo 0 y 1, dps 2 y 3
             for (int i = 0; i < rondaActual.size(); i += 2) 
             {
                 Pareja pareja1 = rondaActual.get(i);
                 Pareja pareja2 = rondaActual.get(i + 1);
 
-                Combate combate = new Combate(pareja1, pareja2, this.observadores);
+                Combate combate = new Combate(ronda, pareja1, pareja2, this.observadores);
                 Pareja ganadora = combate.desarrollarCombate();
-
+                ronda++;
                 siguienteRonda.add(ganadora);
             }
 
