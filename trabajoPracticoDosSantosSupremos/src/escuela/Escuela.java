@@ -2,9 +2,8 @@ package escuela;
 
 
 import equipamiento.Equipamiento;
-import tecnica.Tecnica;
-
 import java.util.List;
+import tecnica.Tecnica;
 
 public class Escuela 
 {
@@ -14,6 +13,14 @@ public class Escuela
 
     public Escuela(String nombre, List<Tecnica> tecnicas, List<Equipamiento> equipamientos)
     {
+        if (nombre == null || nombre.trim().isEmpty()) 
+        {
+            throw new IllegalArgumentException("La escuela debe tener un nombre válido.");
+        }
+        if (tecnicas.contains(null))
+            throw new IllegalArgumentException("no puede haber una tecnica nula");
+        if (equipamientos.contains(null))
+            throw new IllegalArgumentException("no puede haber un equipamiento nulo");
         this.nombre = nombre;
         this.tecnicas = List.copyOf(tecnicas);
         this.equipamientos = List.copyOf(equipamientos);

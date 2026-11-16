@@ -32,4 +32,10 @@ public abstract class Tecnica implements Accion
 
     @Override
     public abstract void ejecutar(Combatiente ejecutor, Combatiente objetivo);
+
+    @Override 
+    public String toString() 
+    {
+        return nombre + ", Tipo: " + tipo;
+    }
 }

@@ -407,4 +407,10 @@ public abstract class Combatiente implements Comparable<Combatiente>
     	return ordenAprendidas;
     }
     
+    @Override
+    public String toString()
+    {
+    	return nombre + " ID: " + id;
+    }
+    
 }

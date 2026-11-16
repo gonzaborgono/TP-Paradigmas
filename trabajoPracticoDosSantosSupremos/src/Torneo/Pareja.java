@@ -1,7 +1,6 @@
-package Pareja;
+package Torneo;
 
 import combatiente.Combatiente;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -62,4 +61,11 @@ public class Pareja {
     {
     	return combatientes.getFirst().getVidaAct() + combatientes.getLast().getVidaAct();
     }
+
+	@Override
+	public String toString()
+	{
+		return "Pareja #" + this.ID + " [" + this.getCombatiente1().getNombre() + " y " + this.getCombatiente2().getNombre() + "]";
+	}
 }
+

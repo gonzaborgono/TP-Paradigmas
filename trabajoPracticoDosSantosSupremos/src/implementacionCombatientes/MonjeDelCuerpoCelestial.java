@@ -1,4 +1,6 @@
-package combatiente;
+package implementacionCombatientes;
+
+import combatiente.Combatiente;
 
 //solo creada para que ande el creadorCombatientes, falta implementar
 //Stats sujetas a modificacion

@@ -1,8 +1,8 @@
-package combatiente;
-
+package implementacionCombatientes;
+import combatiente.Combatiente;
+import equipamiento.Equipamiento;
 import escuela.Escuela;
 import tecnica.Tecnica;
-import equipamiento.Equipamiento;
 
 
 public class CreadorCombatientes {
