@@ -3,10 +3,12 @@ import equipamiento.Equipamiento;
 import implementacionTecnicas.AtaqueBasico;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import tecnica.Tecnica;
+import efecto.Efecto;
 public abstract class Combatiente implements Comparable<Combatiente>
 {
     public static final int MAX_EQUIPAMIENTOS = 3;
@@ -31,6 +33,9 @@ public abstract class Combatiente implements Comparable<Combatiente>
     private AtaqueBasico basico = new AtaqueBasico();
     //atributo para controlar el bonus al caer compañero
     private boolean reaccionActiva;
+    //lista de efectos activos que tiene
+    private List<Efecto> efectosActivos = new ArrayList<Efecto>();
+
     public Combatiente(String nombre, int vidaMax, int energiaMax, double multDanoRecibido, double multDanoRealizado, double multGastoEnergia) {
         if (nombre == null || nombre.trim().isEmpty()) 
         {
@@ -106,6 +111,7 @@ public abstract class Combatiente implements Comparable<Combatiente>
             acomodarFinCompaneroFueraDeCombate();
         
         this.multDefensaTemporal = 1.0;
+        this.efectosActivos.clear(); //limpiar lista de estados
     }
     //reaccion (es abstracta pq depende de cada tipo de combatiente)
     public abstract void reaccionarCompaneroFueraDeCombate();
@@ -121,6 +127,29 @@ public abstract class Combatiente implements Comparable<Combatiente>
     protected void desactivarReaccion()
     {
         this.reaccionActiva = false;
+    }
+    //metodos para manejar efectos
+    public void agregarEfectoTemporal(Efecto efecto) 
+    {
+        if (efecto == null) 
+        {
+            throw new IllegalArgumentException("El efecto temporal no puede ser nulo");
+        }
+        this.efectosActivos.add(efecto);
+    }
+    public void procesarEfectosTemporales() 
+    { //se hace con iterador para poder hacer el remove si ya se acabo, con un foreach no se puede
+        Iterator<Efecto> it = this.efectosActivos.iterator();
+        //si cae fuera de combate cortar el loop de los efectos
+        while (it.hasNext() && !this.estaFueraDeCombate())
+        {
+            Efecto efecto = it.next();
+            efecto.realizarTurno(this);
+            if (efecto.termino())
+            {
+                it.remove();
+            }
+        }
     }
     public boolean estaFueraDeCombate() 
     {

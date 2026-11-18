@@ -2,9 +2,6 @@ package implementacionCombatientes;
 
 import combatiente.Combatiente;
 
-//solo creada para que ande el creadorCombatientes, falta implementar
-//Stats sujetas a modificacion
-
 public class MonjeDelCuerpoCelestial extends Combatiente{
 
 	public MonjeDelCuerpoCelestial(String nombre) {
@@ -19,11 +16,12 @@ public class MonjeDelCuerpoCelestial extends Combatiente{
     }
     @Override 
 	public void reaccionarCompaneroFueraDeCombate()
-	{ //al morir su compañero gana mas resistencia (20% mas)
+	{ //al morir su compañero se cura un poco y gana ataque
 		if(!this.tieneReaccionActiva())
 		{
 			this.activarReaccion();
-			this.disminuirMultDanoRecibido(0.2);
+			this.aumentarVidaAct(25);
+        	this.aumentarMultDanoRealizado(0.15);
 		}
 	}
 	@Override
@@ -32,7 +30,7 @@ public class MonjeDelCuerpoCelestial extends Combatiente{
 		if(this.tieneReaccionActiva())
 		{
 			this.desactivarReaccion();
-			this.aumentarMultDanoRecibido(0.2);
+			this.disminuirMultDanoRealizado(0.15);
 		}
 	}
 }

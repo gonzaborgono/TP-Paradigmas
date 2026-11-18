@@ -2,9 +2,6 @@ package implementacionCombatientes;
 
 import combatiente.Combatiente;
 
-//solo creada para que ande el creadorCombatientes, falta implementar
-//Stats sujetas a modificacion
-
 public class HechiceroDelVacio extends Combatiente{
 
 	public HechiceroDelVacio(String nombre) {

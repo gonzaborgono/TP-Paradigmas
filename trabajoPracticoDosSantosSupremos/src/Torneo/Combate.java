@@ -134,6 +134,23 @@ public class Combate
             }
             if (!ejecutor.estaFueraDeCombate()) //solo atacar si el combatiente sigue vivo
             {
+                //registrar vida antes de aplicarle efectos
+                int vidaAntes = ejecutor.getVidaAct();
+                ejecutor.procesarEfectosTemporales(); //aplicar efectos que tenga
+                //si murio ahora
+                if (vidaAntes > 0 && ejecutor.estaFueraDeCombate()) 
+                {
+                    //notificar evento
+                    notificarEvento(new EventoEliminacion(ejecutor));
+                    Combatiente companero = obtenerCompanero(ejecutor, atacante);
+                    //activar boost del compañero
+                    if (!companero.estaFueraDeCombate()) 
+                    {
+                        companero.reaccionarCompaneroFueraDeCombate();
+                    }
+                    //no hace su accion porque murio, continua el for por si falta el compañero
+                    continue; 
+                }
                 realizarAccionIndividual(ejecutor, atacante, defensora);
             }
         }
