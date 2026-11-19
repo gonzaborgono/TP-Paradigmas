@@ -1,8 +1,12 @@
 package escuela;
 
 
+import combatiente.Combatiente;
 import equipamiento.Equipamiento;
+import equipamiento.TipoEquipamiento;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import tecnica.Tecnica;
 
 public class Escuela 
@@ -17,10 +21,20 @@ public class Escuela
         {
             throw new IllegalArgumentException("La escuela debe tener un nombre válido.");
         }
-        if (tecnicas.contains(null))
-            throw new IllegalArgumentException("no puede haber una tecnica nula");
-        if (equipamientos.contains(null))
-            throw new IllegalArgumentException("no puede haber un equipamiento nulo");
+        if (tecnicas == null || equipamientos == null)
+            throw new IllegalArgumentException("La escuela necesita listas de técnicas y equipos.");
+        Set<Tecnica> tecnicasUnicas = new HashSet<>();
+        for (Tecnica tecnica : tecnicas) {
+            if (tecnica == null || !tecnicasUnicas.add(tecnica))
+                throw new IllegalArgumentException("Las técnicas iniciales deben ser válidas y distintas.");
+        }
+        if (equipamientos.size() > Combatiente.MAX_EQUIPAMIENTOS)
+            throw new IllegalArgumentException("Una escuela puede preparar hasta tres equipos.");
+        Set<TipoEquipamiento> categorias = new HashSet<>();
+        for (Equipamiento equipo : equipamientos) {
+            if (equipo == null || !categorias.add(equipo.getTipoEquipamiento()))
+                throw new IllegalArgumentException("El equipo inicial debe tener categorías distintas.");
+        }
         this.nombre = nombre;
         this.tecnicas = List.copyOf(tecnicas);
         this.equipamientos = List.copyOf(equipamientos);

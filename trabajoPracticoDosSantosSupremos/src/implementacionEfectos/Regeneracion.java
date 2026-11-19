@@ -9,9 +9,9 @@ public class Regeneracion extends Efecto
 
     public Regeneracion(int curacionPorTurno, int duracionTurnos) 
     {
-        if (curacionPorTurno <= 0 || duracionTurnos <= 0) 
-            throw new IllegalArgumentException("Ni la duracion ni el daño pueden ser negativos o 0");
         super("Regeneracion", duracionTurnos);
+        if (curacionPorTurno <= 0)
+            throw new IllegalArgumentException("La intensidad por turno debe ser positiva.");
         this.curacionPorTurno = curacionPorTurno;
     }
 

@@ -8,10 +8,9 @@ public class Veneno extends Efecto
     private int danoPorTurno;
     public Veneno(int danoPorTurno, int duracionTurnos)
     {
-        if (duracionTurnos <= 0 || danoPorTurno <= 0) 
-            throw new IllegalArgumentException("Ni la duracion ni el daño pueden ser negativos o 0");
-
         super("Veneno", duracionTurnos);
+        if (danoPorTurno <= 0)
+            throw new IllegalArgumentException("La intensidad por turno debe ser positiva.");
         this.danoPorTurno = danoPorTurno;
     }
     @Override

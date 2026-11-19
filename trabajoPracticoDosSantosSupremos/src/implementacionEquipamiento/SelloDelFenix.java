@@ -8,10 +8,12 @@ public class SelloDelFenix extends Equipamiento{
     {
         super("Sello del fenix", TipoEquipamiento.SELLO);
     }
+    @Override
     public void aplicarEfecto(Combatiente combatiente)
     {
         combatiente.aumentarVidaMax(30);
     }
+    @Override
     public void retirarEfecto(Combatiente combatiente)
     {
         combatiente.disminuirVidaMax(30);

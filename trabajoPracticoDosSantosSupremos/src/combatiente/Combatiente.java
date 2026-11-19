@@ -2,11 +2,12 @@ package combatiente;
 import equipamiento.Equipamiento;
 import implementacionTecnicas.AtaqueBasico;
 import java.util.ArrayList;
-import java.util.HashMap;
+import escuela.Escuela;
+import java.util.LinkedHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Collections;
 import tecnica.Tecnica;
 import efecto.Efecto;
 public abstract class Combatiente implements Comparable<Combatiente>
@@ -14,10 +15,10 @@ public abstract class Combatiente implements Comparable<Combatiente>
     public static final int MAX_EQUIPAMIENTOS = 3;
     public static final int USOS_TECNICAS_POR_TORNEO = 5;
     
-    private static int proxId = 1;
 
     private final int id;
     private final String nombre;
+    private final Escuela escuela;
     private int vidaMax;
     private int vidaAct;
     private int energiaMax;
@@ -25,22 +26,25 @@ public abstract class Combatiente implements Comparable<Combatiente>
     private double multDanoRecibido;
     private double multDanoRealizado;
     private double multGastoEnergia;
-    private List<Equipamiento> equipamientos;
-    private List<Tecnica> ordenAprendidas;
-    private Map<Tecnica, Integer> tecnicas;
+    private final List<Equipamiento> equipamientos;
+    private final Map<Tecnica, Integer> tecnicas;
+    private boolean enCombate;
     private boolean defensaActiva;
     private double multDefensaTemporal = 1.0;
-    private AtaqueBasico basico = new AtaqueBasico();
+    private final AtaqueBasico basico = new AtaqueBasico();
     //atributo para controlar el bonus al caer compañero
     private boolean reaccionActiva;
     //lista de efectos activos que tiene
-    private List<Efecto> efectosActivos = new ArrayList<Efecto>();
+    private final List<Efecto> efectosActivos = new ArrayList<>();
 
-    public Combatiente(String nombre, int vidaMax, int energiaMax, double multDanoRecibido, double multDanoRealizado, double multGastoEnergia) {
+    protected Combatiente(String nombre, Escuela escuela, int vidaMax, int energiaMax,
+            double multDanoRecibido, double multDanoRealizado, double multGastoEnergia) {
         if (nombre == null || nombre.trim().isEmpty()) 
         {
             throw new IllegalArgumentException("El combatiente debe tener un nombre válido.");
         }
+        if (escuela == null)
+            throw new IllegalArgumentException("El combatiente debe pertenecer a una escuela.");
         if (vidaMax <= 0) 
         {
             throw new IllegalArgumentException("La vida máxima no puede ser negativa o 0.");
@@ -62,9 +66,9 @@ public abstract class Combatiente implements Comparable<Combatiente>
             throw new IllegalArgumentException("El multiplicador de gasto de energía no puede ser negativo o 0.");
         }
 
-        this.id = proxId;
-        proxId++;
+        this.id = CreadorCombatientes.asignarId();
         this.nombre = nombre;
+        this.escuela = escuela;
         this.vidaMax = vidaMax;
         this.vidaAct = vidaMax;
         this.energiaMax = energiaMax;
@@ -72,9 +76,8 @@ public abstract class Combatiente implements Comparable<Combatiente>
         this.multDanoRecibido = multDanoRecibido;
         this.multDanoRealizado = multDanoRealizado;
         this.multGastoEnergia = multGastoEnergia;
-        this.equipamientos = new ArrayList<Equipamiento>();
-        this.ordenAprendidas = new ArrayList<Tecnica>();
-        this.tecnicas = new HashMap<Tecnica, Integer>();
+        this.equipamientos = new ArrayList<>();
+        this.tecnicas = new LinkedHashMap<>();
         this.defensaActiva = false;
         this.reaccionActiva = false;
     }
@@ -89,25 +92,60 @@ public abstract class Combatiente implements Comparable<Combatiente>
             throw new IllegalArgumentException("El daño base no puede ser negativo.");
         }
         
-        return (int) Math.round(danoBase * this.multDanoRealizado);
+        return (int) Math.round(danoBase * getMultDanoRealizado());
     }
     public void recibirDano(int cantidad) 
     {
-        int danoFinal = (int) Math.round(cantidad * multDanoRecibido * multDefensaTemporal);
-        this.disminuirVidaAct(danoFinal);
+        if (cantidad < 0)
+            throw new IllegalArgumentException("El daño no puede ser negativo.");
+        int danoFinal = (int) Math.round(cantidad * getMultDanoRecibido() * multDefensaTemporal);
+        if (danoFinal > 0)
+            disminuirVidaAct(danoFinal);
     }
-    public void gastarEnergia(int cantidad)
-    {
-    	int gastoFinal = (int) Math.round(cantidad * multGastoEnergia);
-        this.disminuirEnergiaAct(gastoFinal);
+
+    public int calcularCostoEnergia(int cantidad) {
+        if (cantidad < 0)
+            throw new IllegalArgumentException("El costo no puede ser negativo.");
+        return (int) Math.round(cantidad * getMultGastoEnergia());
+    }
+
+    public void gastarEnergia(int cantidad) {
+        int costo = calcularCostoEnergia(cantidad);
+        if (costo > energiaAct)
+            throw new IllegalStateException("Energía insuficiente para ejecutar la técnica.");
+        if (costo > 0)
+            disminuirEnergiaAct(costo);
+    }
+
+    public void iniciarCombate() {
+        if (enCombate)
+            throw new IllegalStateException("El combatiente ya está en un combate.");
+        resetearEstado();
+        enCombate = true;
+    }
+
+    public void finalizarCombate() {
+        limpiarEfectosDelCombate();
+        enCombate = false;
+    }
+
+    private void validarCambioDePreparacion() {
+        if (enCombate)
+            throw new IllegalStateException("La preparación solo puede cambiar entre combates.");
     }
 
     public void resetearEstado() 
     {
+        if (enCombate)
+            throw new IllegalStateException("No se puede restaurar un combatiente durante el combate.");
         this.vidaAct = this.vidaMax;
         this.energiaAct = this.energiaMax;
+        limpiarEfectosDelCombate();
+    }
+
+    private void limpiarEfectosDelCombate() {
         this.defensaActiva = false;
-        if(this.reaccionActiva) //si reacciono en el ultimo combate, pierde el boost
+        if (this.reaccionActiva)
             acomodarFinCompaneroFueraDeCombate();
         
         this.multDefensaTemporal = 1.0;
@@ -115,7 +153,10 @@ public abstract class Combatiente implements Comparable<Combatiente>
     }
     //reaccion (es abstracta pq depende de cada tipo de combatiente)
     public abstract void reaccionarCompaneroFueraDeCombate();
-    public abstract void acomodarFinCompaneroFueraDeCombate();
+
+    public void acomodarFinCompaneroFueraDeCombate() {
+        reaccionActiva = false;
+    }
     public boolean tieneReaccionActiva()
     {
         return reaccionActiva;
@@ -123,10 +164,6 @@ public abstract class Combatiente implements Comparable<Combatiente>
     protected void activarReaccion()
     {
         this.reaccionActiva = true;
-    }
-    protected void desactivarReaccion()
-    {
-        this.reaccionActiva = false;
     }
     //metodos para manejar efectos
     public void agregarEfectoTemporal(Efecto efecto) 
@@ -175,6 +212,7 @@ public abstract class Combatiente implements Comparable<Combatiente>
 
     public void equipar(Equipamiento nuevoEquipamiento) 
     {
+        validarCambioDePreparacion();
         if (nuevoEquipamiento == null) 
         {
             throw new IllegalArgumentException("El equipamiento no puede ser nulo.");
@@ -187,22 +225,24 @@ public abstract class Combatiente implements Comparable<Combatiente>
         {
             throw new IllegalStateException("Ya se llegó al límite de equipamientos permitidos.");
         }
-        equipamientos.add(nuevoEquipamiento);
         nuevoEquipamiento.aplicarEfecto(this);
+        equipamientos.add(nuevoEquipamiento);
     }
 
     public void desequipar(Equipamiento sacarEquipamiento) 
     {
+        validarCambioDePreparacion();
         if (!equipamientos.contains(sacarEquipamiento)) 
         {
             throw new IllegalArgumentException("El combatiente no tiene el equipamiento que se quiere sacar.");
         }
-        equipamientos.remove(sacarEquipamiento);
         sacarEquipamiento.retirarEfecto(this);
+        equipamientos.remove(sacarEquipamiento);
     }
 
     public void agregarTecnica(Tecnica nuevaTecnica) 
     {
+        validarCambioDePreparacion();
         if (nuevaTecnica == null) 
         {
             throw new IllegalArgumentException("La técnica no puede ser nula.");
@@ -211,12 +251,7 @@ public abstract class Combatiente implements Comparable<Combatiente>
         {
             throw new IllegalStateException("El combatiente ya posee esta técnica.");
         }
-        if (nuevaTecnica == this.basico)
-        {
-            throw new IllegalArgumentException("La técnica no puede ser el ataque basico.");
-        }
         tecnicas.put(nuevaTecnica, USOS_TECNICAS_POR_TORNEO);
-        ordenAprendidas.add(nuevaTecnica);
     }
 
     //modificar vida
@@ -236,9 +271,9 @@ public abstract class Combatiente implements Comparable<Combatiente>
         {
             throw new IllegalArgumentException("La disminución no puede ser negativa o 0.");
         }
+        if (disminucion >= this.vidaMax)
+            throw new IllegalStateException("La vida máxima debe ser positiva.");
         this.vidaMax -= disminucion;
-        if (this.vidaMax <= 0) 
-        	throw new IllegalStateException("la vida maxima nunca puede ser 0 o negativa");
         if (this.vidaAct > this.vidaMax) 
         {
             this.vidaAct = this.vidaMax; //recortar vida si esta supera el maximo
@@ -251,6 +286,8 @@ public abstract class Combatiente implements Comparable<Combatiente>
         {
             throw new IllegalArgumentException("El aumento no puede ser negativo o 0.");
         }
+        if (enCombate && estaFueraDeCombate())
+            return;
         this.vidaAct += aumento;
         if (this.vidaAct > this.vidaMax) //que no se pase del max
         {
@@ -288,9 +325,9 @@ public abstract class Combatiente implements Comparable<Combatiente>
         {
             throw new IllegalArgumentException("La disminución no puede ser negativa o 0.");
         }
+        if (disminucion >= this.energiaMax)
+            throw new IllegalStateException("La energía máxima debe ser positiva.");
         this.energiaMax -= disminucion;
-        if (this.energiaMax < 0) 
-        	throw new IllegalStateException("la energia maxima nunca puede ser 0 o negativa");
         if (this.energiaAct > this.energiaMax) 
         {
             this.energiaAct = this.energiaMax;
@@ -382,16 +419,16 @@ public abstract class Combatiente implements Comparable<Combatiente>
 
     //comparar basado en id
     @Override
-    public boolean equals(Object obj) {
+    public final boolean equals(Object obj) {
         if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
+        if (!(obj instanceof Combatiente)) return false;
         Combatiente that = (Combatiente) obj;
         return id == that.id;
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(id);
+    public final int hashCode() {
+        return Integer.hashCode(id);
     }
 
     //getters
@@ -431,12 +468,27 @@ public abstract class Combatiente implements Comparable<Combatiente>
         return multGastoEnergia;
     }
 
+    public Escuela getEscuela() {
+        return escuela;
+    }
+
     public List<Equipamiento> getEquipamientos() {
-        return equipamientos;
+        return List.copyOf(equipamientos);
     }
 
     public Map<Tecnica, Integer> getTecnicas() {
-        return tecnicas;
+        return Collections.unmodifiableMap(new LinkedHashMap<>(tecnicas));
+    }
+
+    public int getUsosRestantes(Tecnica tecnica) {
+        return tecnicas.getOrDefault(tecnica, 0);
+    }
+
+    public void reiniciarUsosTecnicas() {
+        validarCambioDePreparacion();
+        for (Map.Entry<Tecnica, Integer> entrada : tecnicas.entrySet()) {
+            entrada.setValue(USOS_TECNICAS_POR_TORNEO);
+        }
     }
     
     public void usarTecnica(Tecnica tecnica)
@@ -451,12 +503,12 @@ public abstract class Combatiente implements Comparable<Combatiente>
     @Override
     public int compareTo(Combatiente otro)
     {
-    	return this.id - otro.id;
+        return Integer.compare(this.id, otro.id);
     }
     
     public List<Tecnica> getOrdenAprendidas()
     {
-    	return ordenAprendidas;
+        return new ArrayList<>(tecnicas.keySet());
     }
     
     @Override

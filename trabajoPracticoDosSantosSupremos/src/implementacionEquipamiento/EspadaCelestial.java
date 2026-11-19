@@ -8,11 +8,13 @@ public class EspadaCelestial extends Equipamiento
     {
         super("Espada Celestial", TipoEquipamiento.ARMA);
     }
+    @Override
     public void aplicarEfecto(Combatiente combatiente)
     {
         combatiente.aumentarMultDanoRealizado(0.15);
     }
-	public void retirarEfecto(Combatiente combatiente)
+    @Override
+    public void retirarEfecto(Combatiente combatiente)
     {
         combatiente.disminuirMultDanoRealizado(0.15);
     }

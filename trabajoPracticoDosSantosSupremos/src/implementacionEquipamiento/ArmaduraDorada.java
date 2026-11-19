@@ -8,10 +8,12 @@ public class ArmaduraDorada extends Equipamiento
     {
         super("Armadura Dorada", TipoEquipamiento.ARMADURA);
     }
+    @Override
     public void aplicarEfecto(Combatiente combatiente)
     {
         combatiente.disminuirMultDanoRecibido(0.15);
     }
+    @Override
     public void retirarEfecto(Combatiente combatiente)
     {
         combatiente.aumentarMultDanoRecibido(0.15);

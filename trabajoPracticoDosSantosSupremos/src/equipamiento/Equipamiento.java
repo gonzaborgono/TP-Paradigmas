@@ -8,8 +8,8 @@ public abstract class Equipamiento
 	private final TipoEquipamiento tipo;
 	public Equipamiento(String nombre, TipoEquipamiento tipo)
 	{
-		if(nombre.length() == 0)
-			throw new IllegalArgumentException("todo equipamiento debe tener un nombre");
+		if (nombre == null || nombre.trim().isEmpty() || tipo == null)
+			throw new IllegalArgumentException("El equipamiento requiere un nombre y una categoría.");
 		this.nombre = nombre;
 		this.tipo = tipo;
 	}
