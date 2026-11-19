@@ -1,39 +1,45 @@
 package combatiente;
 
-import escuela.Escuela;
-import tecnica.Tecnica;
 import equipamiento.Equipamiento;
-
+import escuela.Escuela;
+import implementacionCombatientes.CultivadorDeLaEspada;
+import implementacionCombatientes.HechiceroDelVacio;
+import implementacionCombatientes.MonjeDelCuerpoCelestial;
+import tecnica.Tecnica;
 
 public class CreadorCombatientes {
-    public Combatiente crear(String tipo, String nombre, Escuela escuela) {
-        Combatiente nuevoCombatiente = null;
+    private static int proximoId = 1;
 
-        switch(tipo) {
+    static int asignarId() {
+        return proximoId++;
+    }
+
+    public Combatiente crear(String tipo, String nombre, Escuela escuela) {
+        if (tipo == null || escuela == null) {
+            throw new IllegalArgumentException("Se requiere un tipo y una escuela.");
+        }
+
+        Combatiente combatiente;
+        switch (tipo) {
             case "Cultivador de la Espada":
-                nuevoCombatiente = new CultivadorDeLaEspada(nombre);
+                combatiente = new CultivadorDeLaEspada(nombre, escuela);
                 break;
             case "Monje del Cuerpo Celestial":
-                nuevoCombatiente = new MonjeDelCuerpoCelestial(nombre);
+                combatiente = new MonjeDelCuerpoCelestial(nombre, escuela);
                 break;
             case "Hechicero del Vacío":
-                nuevoCombatiente = new HechiceroDelVacio(nombre);
+                combatiente = new HechiceroDelVacio(nombre, escuela);
                 break;
             default:
                 throw new IllegalArgumentException("Tipo de combatiente desconocido: " + tipo);
         }
 
-        
-        for(Equipamiento item : escuela.getEquipamientos()) {
-            nuevoCombatiente.equipar(item);
+        for (Equipamiento item : escuela.getEquipamientos()) {
+            combatiente.equipar(item);
         }
-        
-        
-        for(Tecnica tecnica : escuela.getTecnicas()) {
-            nuevoCombatiente.agregarTecnica(tecnica); 
+        for (Tecnica tecnica : escuela.getTecnicas()) {
+            combatiente.agregarTecnica(tecnica);
         }
-	
-	
-        return nuevoCombatiente;
+        return combatiente;
     }
 }

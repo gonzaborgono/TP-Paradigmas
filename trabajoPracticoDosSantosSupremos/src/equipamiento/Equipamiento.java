@@ -1,6 +1,6 @@
 package equipamiento;
 import combatiente.Combatiente;
-import equipamiento.TipoEquipamiento;
+
 //clase no final, solo referencia para poder hacer combatiente
 public abstract class Equipamiento 
 {
@@ -8,13 +8,13 @@ public abstract class Equipamiento
 	private final TipoEquipamiento tipo;
 	public Equipamiento(String nombre, TipoEquipamiento tipo)
 	{
-		if(nombre.length() == 0)
-			throw new IllegalArgumentException("todo equipamiento debe tener un nombre");
+		if (nombre == null || nombre.trim().isEmpty() || tipo == null)
+			throw new IllegalArgumentException("El equipamiento requiere un nombre y una categoría.");
 		this.nombre = nombre;
 		this.tipo = tipo;
 	}
-	public abstract void aplicarEfectos(Combatiente combatiente);
-	public abstract void retirarEfectos(Combatiente combatiente);
+	public abstract void aplicarEfecto(Combatiente combatiente);
+	public abstract void retirarEfecto(Combatiente combatiente);
 	public TipoEquipamiento getTipoEquipamiento()
 	{
 		return tipo;
