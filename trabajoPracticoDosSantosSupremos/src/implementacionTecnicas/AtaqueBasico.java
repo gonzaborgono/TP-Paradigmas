@@ -1,20 +1,18 @@
 package implementacionTecnicas;
 
 import combatiente.Combatiente;
-import tecnica.Tecnica;
-import tecnica.TipoTecnica;
+import tecnica.Accion;
 
-public class AtaqueBasico extends Tecnica
-{
-	public AtaqueBasico() 
-	{
-		super("Ataque basico", 0, TipoTecnica.OFENSIVA);
-	}
-	@Override
-	public void ejecutar(Combatiente ejecutor, Combatiente objetivo) 
-	{
-		int dano = ejecutor.calcularDanoRealizado(15);//daño bajo
-		objetivo.recibirDano(dano); 
-	}
+public class AtaqueBasico implements Accion {
+    @Override
+    public String getNombre() {
+        return "Ataque básico";
+    }
 
+    @Override
+    public void ejecutar(Combatiente ejecutor, Combatiente objetivo) {
+        if (ejecutor.estaFueraDeCombate() || objetivo.estaFueraDeCombate())
+            throw new IllegalStateException("Los combatientes de la acción deben estar en pie.");
+        objetivo.recibirDano(ejecutor.calcularDanoRealizado(15));
+    }
 }

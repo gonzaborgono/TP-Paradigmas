@@ -11,9 +11,9 @@ public class DominioDeLaNada extends Tecnica
 	}
 
 	@Override
-	public void ejecutar(Combatiente ejecutor, Combatiente objetivo) 
+	protected void aplicar(Combatiente ejecutor, Combatiente objetivo)
 	{
-		ejecutor.gastarEnergia(getCostoEnergia());
+
 		int dano = ejecutor.calcularDanoRealizado(30);
 		objetivo.recibirDano(dano);
 		objetivo.disminuirEnergiaAct(20);

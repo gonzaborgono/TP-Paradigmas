@@ -1,29 +1,42 @@
 package Torneo;
-import combatiente.Combatiente;
-import tecnica.Tecnica;
-public class EventoAccionRealizada extends Evento
-{
-    private Combatiente ejecutor;
-    private Combatiente objetivo;
-    private Tecnica tecnicaUsada;
 
-    public EventoAccionRealizada(Combatiente ejecutor, Combatiente objetivo, Tecnica tecnicaUsada)
-    {
-        super("El combatiente " + ejecutor + " realizo la tecnica " + tecnicaUsada + " sobre el combatiente " + objetivo);
-        this.ejecutor = ejecutor;
-        this.objetivo = objetivo;
-        this.tecnicaUsada = tecnicaUsada;
+import combatiente.Combatiente;
+import tecnica.Accion;
+
+public class EventoAccionRealizada extends Evento {
+    private final int ronda;
+    private final int asalto;
+    private final EstadoCombatiente ejecutor;
+    private final EstadoCombatiente objetivo;
+    private final Accion accion;
+
+    public EventoAccionRealizada(int ronda, int asalto, Combatiente ejecutor, Combatiente objetivo, Accion accion) {
+        super("Asalto " + asalto + ". " + ejecutor + " usa " + accion.getNombre() + " sobre " + objetivo
+                + " (vida restante: " + objetivo.getVidaAct() + ").");
+        this.ronda = ronda;
+        this.asalto = asalto;
+        this.ejecutor = new EstadoCombatiente(ejecutor);
+        this.objetivo = new EstadoCombatiente(objetivo);
+        this.accion = accion;
     }
 
-    public Combatiente getEjecutor() {
+    public int getRonda() {
+        return ronda;
+    }
+
+    public int getAsalto() {
+        return asalto;
+    }
+
+    public EstadoCombatiente getEjecutor() {
         return ejecutor;
     }
 
-    public Combatiente getObjetivo() {
+    public EstadoCombatiente getObjetivo() {
         return objetivo;
     }
 
-    public Tecnica getTecnicaUsada() {
-        return tecnicaUsada;
+    public Accion getAccion() {
+        return accion;
     }
 }

@@ -11,9 +11,9 @@ public class MuroDelCuerpoDorado extends Tecnica
 	}
 
 	@Override
-	public void ejecutar(Combatiente ejecutor, Combatiente objetivo) 
+	protected void aplicar(Combatiente ejecutor, Combatiente objetivo)
 	{
-		ejecutor.gastarEnergia(getCostoEnergia());
+
 		objetivo.activarDefensaTemporal(0.25);//25% menos de daño recibido durante este combate
 	}
 

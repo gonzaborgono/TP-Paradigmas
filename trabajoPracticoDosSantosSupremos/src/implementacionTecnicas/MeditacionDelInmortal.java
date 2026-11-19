@@ -4,16 +4,16 @@ import combatiente.Combatiente;
 import tecnica.Tecnica;
 import tecnica.TipoTecnica;
 
-public class MeditacionDelnmortal extends Tecnica 
+public class MeditacionDelInmortal extends Tecnica 
 {
 
-	public MeditacionDelnmortal() {
+	public MeditacionDelInmortal() {
 		super("Meditacion del inmortal", 30, TipoTecnica.CURACION);
 	}
 
 	@Override
-	public void ejecutar(Combatiente ejecutor, Combatiente objetivo) {
-		ejecutor.gastarEnergia(getCostoEnergia());
+	protected void aplicar(Combatiente ejecutor, Combatiente objetivo) {
+
 		objetivo.aumentarVidaAct(35);
 	}
 

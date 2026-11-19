@@ -12,9 +12,9 @@ public class GolpeVenenoso extends Tecnica
         super("Golpe venenoso", 25, TipoTecnica.OFENSIVA);
     }
     @Override
-    public void ejecutar(Combatiente ejecutor, Combatiente objetivo) 
+    protected void aplicar(Combatiente ejecutor, Combatiente objetivo)
 	{
-		ejecutor.gastarEnergia(getCostoEnergia());
+
         //hace 10 de daño fisico
 		int dano = ejecutor.calcularDanoRealizado(10);
 		objetivo.recibirDano(dano);

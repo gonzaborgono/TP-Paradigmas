@@ -12,9 +12,9 @@ public class CirculacionDelQi extends Tecnica
         super("Circulacion del qi", 10, TipoTecnica.CURACION);
     }
     @Override
-    public void ejecutar(Combatiente ejecutor, Combatiente objetivo) 
+    protected void aplicar(Combatiente ejecutor, Combatiente objetivo)
 	{
-		ejecutor.gastarEnergia(getCostoEnergia());
+
         //se cura por 5 turnos 8 de vida cada turno
         objetivo.agregarEfectoTemporal(new Regeneracion(8, 5));
 	}

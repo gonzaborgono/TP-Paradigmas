@@ -7,377 +7,233 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import tecnica.Accion;
 import tecnica.Tecnica;
 import tecnica.TipoTecnica;
 
-public class Combate 
-{
+public class Combate {
     public static final int LIMITE_ASALTOS_DEFAULT = 20;
     public static final int ENERGIA_RECUPERADA_POR_ASALTO = 10;
 
-    private Pareja pareja1;
-    private Pareja pareja2;
+    private final Pareja pareja1;
+    private final Pareja pareja2;
+    private final List<ObservadorTorneo> observadores;
+    private final Map<Combatiente, Set<Tecnica>> registroUsosCompa = new HashMap<>();
+    private final int ronda;
     private int asaltoActual;
-    private List<ObservadorTorneo> observadores;
-    private Map<Combatiente, Set<Tecnica>> registroUsosCompa; //tiene cada combatiente y el set de tecnicas que uso en este combate, ahi busca el compañero para no repetir
-    private int ronda;
-    public Combate(int ronda, Pareja pareja1, Pareja pareja2, List<ObservadorTorneo> observadores) 
-    {
-        if (pareja1 == null || pareja2 == null) 
-        {
-            throw new IllegalArgumentException("Las parejas del combate no pueden ser nulas.");
-        }
-        if (pareja1.equals(pareja2)) 
-        {
-            throw new IllegalArgumentException("Una pareja no puede combatir contra sí misma.");
+    private boolean iniciado;
+
+    public Combate(int ronda, Pareja pareja1, Pareja pareja2, List<ObservadorTorneo> observadores) {
+        if (ronda <= 0 || pareja1 == null || pareja2 == null || observadores == null) {
+            throw new IllegalArgumentException("El combate necesita una ronda, dos parejas y una lista de observadores.");
         }
         this.ronda = ronda;
         this.pareja1 = pareja1;
         this.pareja2 = pareja2;
-        this.asaltoActual = 0;
-        this.observadores = observadores;
-        this.registroUsosCompa = new HashMap<>();
+        this.observadores = List.copyOf(observadores);
+        if (new HashSet<>(obtenerTodosLosCombatientes()).size() != 4) {
+            throw new IllegalArgumentException("El combate necesita cuatro combatientes distintos.");
+        }
     }
 
-    public Pareja desarrollarCombate() 
-    {
-        resetearEstadoCombatientes();
-        //avisar inicio de combate
-        notificarEvento(new EventoInicioCombate(pareja1, pareja2));
+    public Pareja desarrollarCombate() {
+        if (iniciado)
+            throw new IllegalStateException("Este combate ya se inició.");
+        iniciado = true;
 
-        //hacer que peleen hasta que una pareja cae o se llegue al limite de asaltos
-        while (!pareja1.estaDerrotada() && !pareja2.estaDerrotada() && asaltoActual < LIMITE_ASALTOS_DEFAULT) 
-        {
-            asaltoActual++;
-            recuperarEnergiaInicioAsalto();
-            ejecutarAsalto();
+        EventoResultadoCombate resultado;
+        List<Combatiente> preparados = new ArrayList<>();
+        try {
+            for (Combatiente combatiente : obtenerTodosLosCombatientes()) {
+                combatiente.iniciarCombate();
+                preparados.add(combatiente);
+                registroUsosCompa.put(combatiente, new HashSet<>());
+            }
+            notificarEvento(new EventoInicioCombate(ronda, pareja1, pareja2));
+
+            while (!pareja1.estaDerrotada() && !pareja2.estaDerrotada() && asaltoActual < LIMITE_ASALTOS_DEFAULT) {
+                asaltoActual++;
+                recuperarEnergiaInicioAsalto(preparados);
+                ejecutarAsalto();
+            }
+
+            resultado = obtenerResultado();
+        } finally {
+            for (Combatiente combatiente : preparados) {
+                combatiente.finalizarCombate();
+            }
         }
 
+        // El resultado se publica con el combate cerrado, cuando ya se puede cambiar equipo.
+        notificarEvento(resultado);
+        return resultado.getGanadora();
+    }
+
+    private EventoResultadoCombate obtenerResultado() {
         Pareja ganadora = determinarGanadora();
-        Pareja perdedora;
-        if(pareja1.equals(ganadora))
+        Pareja perdedora = pareja1;
+        if (ganadora == pareja1)
             perdedora = pareja2;
-        else
-            perdedora = pareja1;
-        notificarEvento(new EventoResultadoCombate(ronda, ganadora, perdedora, ganadora.getVidaTotal(), perdedora.getVidaTotal()));
-
-        return ganadora;
+        return new EventoResultadoCombate(ronda, ganadora, perdedora,
+                ganadora.getVidaTotal(), perdedora.getVidaTotal());
     }
 
-    public void notificarEvento(Evento e) 
-    {
-        for (ObservadorTorneo obs : observadores) 
-        {
-            obs.recibirEvento(e);
+    private void notificarEvento(Evento evento) {
+        for (ObservadorTorneo observador : observadores) {
+            observador.recibirEvento(evento);
         }
     }
 
-    private void ejecutarAsalto() 
-    {
-    	Pareja primera;
-    	Pareja segunda;
-        //empieza pareja de menor id
-        if(pareja1.getID() < pareja2.getID())
-        {
-        	primera = pareja1;
-        	segunda = pareja2;
+    private void ejecutarAsalto() {
+        Pareja primera = pareja1;
+        Pareja segunda = pareja2;
+        if (pareja2.getID() < pareja1.getID()) {
+            primera = pareja2;
+            segunda = pareja1;
         }
-        else
-        {
-        	primera = pareja2;
-        	segunda = pareja1;
-        }
-        	
         ejecutarTurnoPareja(primera, segunda);
-
-        //si alguna pareja cae no se hace el turno
-        if (!segunda.estaDerrotada() && !primera.estaDerrotada()) 
-        {
+        if (!primera.estaDerrotada() && !segunda.estaDerrotada()) {
             ejecutarTurnoPareja(segunda, primera);
         }
     }
 
-    private void recuperarEnergiaInicioAsalto() 
-    {
-        //todos los que no esten fuera de combate reciben energia
-        List<Combatiente> todos = obtenerTodosLosCombatientes();
-        for (Combatiente c : todos) 
-        {
-            if (!c.estaFueraDeCombate()) 
-            {
-                c.aumentarEnergiaAct(ENERGIA_RECUPERADA_POR_ASALTO);
-            }
+    private void recuperarEnergiaInicioAsalto(List<Combatiente> combatientes) {
+        for (Combatiente combatiente : combatientes) {
+            if (!combatiente.estaFueraDeCombate())
+                combatiente.aumentarEnergiaAct(ENERGIA_RECUPERADA_POR_ASALTO);
         }
     }
 
-    private void resetearEstadoCombatientes() 
-    {
-        for (Combatiente c : obtenerTodosLosCombatientes()) 
-        {
-            c.resetearEstado();
-            this.registroUsosCompa.put(c, new HashSet<>());
-        }
-    }
+    private void ejecutarTurnoPareja(Pareja atacante, Pareja defensora) {
+        for (Combatiente ejecutor : obtenerIntegrantesOrdenadosPorId(atacante)) {
+            if (defensora.estaDerrotada())
+                return;
+            if (ejecutor.estaFueraDeCombate())
+                continue;
 
-    
-
-    private void ejecutarTurnoPareja(Pareja atacante, Pareja defensora) 
-    {
-        //dentro de la pareja va primero el de menor id
-        List<Combatiente> integrantesOrdenados = obtenerIntegrantesOrdenadosPorId(atacante);
-
-        for (Combatiente ejecutor : integrantesOrdenados) 
-        {
-            if (defensora.estaDerrotada()) //si la defensora cayo con el primer combatiente ya se acaba el combate, no ataca el segundo
-            {
-                break;
-            }
-            if (!ejecutor.estaFueraDeCombate()) //solo atacar si el combatiente sigue vivo
-            {
-                //registrar vida antes de aplicarle efectos
-                int vidaAntes = ejecutor.getVidaAct();
-                ejecutor.procesarEfectosTemporales(); //aplicar efectos que tenga
-                //si murio ahora
-                if (vidaAntes > 0 && ejecutor.estaFueraDeCombate()) 
-                {
-                    //notificar evento
-                    notificarEvento(new EventoEliminacion(ejecutor));
-                    Combatiente companero = obtenerCompanero(ejecutor, atacante);
-                    //activar boost del compañero
-                    if (!companero.estaFueraDeCombate()) 
-                    {
-                        companero.reaccionarCompaneroFueraDeCombate();
-                    }
-                    //no hace su accion porque murio, continua el for por si falta el compañero
-                    continue; 
-                }
+            ejecutor.procesarEfectosTemporales();
+            if (ejecutor.estaFueraDeCombate()) {
+                registrarEliminacion(ejecutor, atacante);
+            } else {
                 realizarAccionIndividual(ejecutor, atacante, defensora);
             }
         }
     }
 
-    private void realizarAccionIndividual(Combatiente ejecutor, Pareja parejaPropia, Pareja parejaRival) 
-    {
-        Combatiente companero = obtenerCompanero(ejecutor, parejaPropia);
-        Tecnica tecnicaElegida = seleccionarTecnicaSegunCriterio(ejecutor, companero);
-        //si no encontro tecnica para usar usa el ataque basico
-        boolean esTecnicaDeEscuela = (tecnicaElegida != null);
-        
-        if (!esTecnicaDeEscuela) //si no es tecnica de escual entonces elige el basico
-        {
-            tecnicaElegida = ejecutor.getBasico();
-        }
-        //buscar objetivo, si es defensiva o curativa si mismo, sino el rival con menos vida o por ID
-        Combatiente objetivo = determinarObjetivoTecnica(tecnicaElegida, ejecutor, parejaRival);
-        //tomar vida para saber si mato al objetivo o no
-        int vidaAntes = objetivo.getVidaAct();
-        //hacer la tecnica
-        tecnicaElegida.ejecutar(ejecutor, objetivo);
-        //si era una tecnica de escuela, marcar que uso la tecnica en sus totales por torneo
-        //y en este combate para que su compañero no pueda usarla
-        if (esTecnicaDeEscuela) 
-        {
-            ejecutor.usarTecnica(tecnicaElegida);
-            this.registroUsosCompa.get(ejecutor).add(tecnicaElegida);
-        }
+    private void realizarAccionIndividual(Combatiente ejecutor, Pareja propia, Pareja rival) {
+        Tecnica tecnica = seleccionarTecnica(ejecutor, obtenerCompanero(ejecutor, propia));
+        Accion accion = tecnica;
+        if (accion == null)
+            accion = ejecutor.getBasico();
+        Combatiente objetivo = ejecutor;
+        if (tecnica == null || tecnica.getTipo() == TipoTecnica.OFENSIVA)
+            objetivo = elegirObjetivoRival(rival);
 
-        notificarEvento(new EventoAccionRealizada(ejecutor, objetivo, tecnicaElegida));
-
-        //si antes estaba vivo y ahora ya no, lo mato en este ataque
-        if (vidaAntes > 0 && objetivo.estaFueraDeCombate()) 
-        {
-            notificarEvento(new EventoEliminacion(objetivo));
-            //si lo mato, avisar al compañero, si esta tivo, para que active su boost de 1 turno
-            Combatiente companeroDelCaido = obtenerCompanero(objetivo, parejaRival);
-            if (!companeroDelCaido.estaFueraDeCombate()) 
-            {
-                companeroDelCaido.reaccionarCompaneroFueraDeCombate();
-            }
+        accion.ejecutar(ejecutor, objetivo);
+        if (tecnica != null) {
+            ejecutor.usarTecnica(tecnica);
+            registroUsosCompa.get(ejecutor).add(tecnica);
         }
-        //si el que ataco tiene el boost de compañero caido activo, desactivarlo ahora que ataco
-        if (ejecutor.tieneReaccionActiva()) 
-        {
+        notificarEvento(new EventoAccionRealizada(ronda, asaltoActual, ejecutor, objetivo, accion));
+
+        if (objetivo.estaFueraDeCombate()) {
+            registrarEliminacion(objetivo, rival);
+        }
+        if (ejecutor.tieneReaccionActiva()) {
             ejecutor.acomodarFinCompaneroFueraDeCombate();
         }
     }
 
-    private Tecnica seleccionarTecnicaSegunCriterio(Combatiente ejecutor, Combatiente companero) 
-    {
-        /* texto de consigna:
-         una técnica de recuperación si le falta vida; 
-         una defensiva si no tiene una activa; 
-         la técnica ofensiva con más usos restantes. 
-         Si ninguna es posible (por energía, usos o regla del compañero), se realiza un ataque básico. 
-         En empate, la primera en el orden de la escuela
-         */
-        //recuperacion si le falta vida
-        if (ejecutor.getVidaAct() < ejecutor.getVidaMax()) 
-        {
-        	//buscar la primer tecnica de recuperacion que tenga y que no haya usado el compañero
-            Tecnica recup = buscarPrimeraDisponible(ejecutor, companero, TipoTecnica.CURACION);
-            if (recup != null) 
-            	return recup;
+    private void registrarEliminacion(Combatiente caido, Pareja pareja) {
+        notificarEvento(new EventoEliminacion(ronda, asaltoActual, caido));
+        Combatiente companero = obtenerCompanero(caido, pareja);
+        if (!companero.estaFueraDeCombate()) {
+            companero.reaccionarCompaneroFueraDeCombate();
         }
+    }
 
-        //defensiva
-        if (!ejecutor.tieneDefensivaActiva()) //si no tiene una activa
-        {
-            Tecnica def = buscarPrimeraDisponible(ejecutor, companero, TipoTecnica.DEFENSIVA);
-            if (def != null) 
-            	return def;
-        }
-
-        //ofensiva con mas usos, si empatan elige por orden de insersion (revisar esto, creo que esta mal)
-        Tecnica mejorOfensiva = null;
+    private Tecnica seleccionarTecnica(Combatiente ejecutor, Combatiente companero) {
+        Tecnica curacion = null;
+        Tecnica defensiva = null;
+        Tecnica ofensiva = null;
         int maxUsos = 0;
-        
-        //recorre por orden de aprendidas
-        for (Tecnica t : ejecutor.getOrdenAprendidas()) 
-        {
-        	//busca los usos que le quedan a esa tecnica en el torneo
-            int usosRestantes = ejecutor.getTecnicas().get(t);
-
-            //si es ofensiva y la puede usar (toma en cuenta restriccion de compañero, energia, etc)
-            if (t.getTipo() == TipoTecnica.OFENSIVA && puedeUsarTecnica(ejecutor, companero, t, usosRestantes)) 
-            {
-            	//busca la maxima de las que puede usar y son ofensivas
-                if (usosRestantes > maxUsos) 
-                {
-                    maxUsos = usosRestantes;
-                    mejorOfensiva = t;
-                }
+        for (Tecnica tecnica : ejecutor.getOrdenAprendidas()) {
+            int usos = ejecutor.getUsosRestantes(tecnica);
+            if (!puedeUsarTecnica(ejecutor, companero, tecnica, usos))
+                continue;
+            switch (tecnica.getTipo()) {
+                case CURACION:
+                    if (curacion == null && ejecutor.getVidaAct() < ejecutor.getVidaMax())
+                        curacion = tecnica;
+                    break;
+                case DEFENSIVA:
+                    if (defensiva == null && !ejecutor.tieneDefensivaActiva())
+                        defensiva = tecnica;
+                    break;
+                case OFENSIVA:
+                    if (usos > maxUsos) {
+                        maxUsos = usos;
+                        ofensiva = tecnica;
+                    }
+                    break;
             }
         }
-
-        return mejorOfensiva;
+        if (curacion != null)
+            return curacion;
+        if (defensiva != null)
+            return defensiva;
+        return ofensiva;
     }
 
-    private Tecnica buscarPrimeraDisponible(Combatiente ejecutor, Combatiente companero, TipoTecnica tipo) 
-    {
-        //pide todas al ejecutor y hace la primera que pueda hacer del tipo
-        for (Tecnica t : ejecutor.getOrdenAprendidas()) 
-        {
-            int usos = ejecutor.getTecnicas().get(t);
-            if (t.getTipo() == tipo && puedeUsarTecnica(ejecutor, companero, t, usos)) 
-            {
-                return t;
-            }
-        }
-        return null;
-    }
-
-    private boolean puedeUsarTecnica(Combatiente ejecutor, Combatiente companero, Tecnica tecnica, int usosRestantes) 
-    {
-    	/* consgina sobre usar tecnica
-    	 cuando un integrante usa una técnica en un combate, 
-    	 su compañero no puede usarla mientras el primero conserve usos de ella y siga en pie;
-    	 si los agota o queda fuera de combate, el compañero puede usarla. 
-    	 La restricción termina con el combate: en el siguiente, 
-    	 cualquiera de los dos puede volver a usarla.
-    	 */
-    	
-        //validar usos restantes > 0 y que energia alcanze
-    	//calcular costo real, teniendo en cuenta que no todos los combatientes gastan la misma energia para hacer la misma tecnica
-        int costoReal = (int) Math.round(tecnica.getCostoEnergia() * ejecutor.getMultGastoEnergia());
-        
-        if (usosRestantes <= 0 || ejecutor.getEnergiaAct() < costoReal) 
-        {
+    private boolean puedeUsarTecnica(Combatiente ejecutor, Combatiente companero, Tecnica tecnica, int usos) {
+        if (usos <= 0 || ejecutor.getEnergiaAct() < ejecutor.calcularCostoEnergia(tecnica.getCostoEnergia()))
             return false;
-        }
-
-        
-        //si el compañero sigue en combate y ya uso la tecnica no la puede usar
-        if (!companero.estaFueraDeCombate()) 
-        {
-            Set<Tecnica> usadasPorCompa = this.registroUsosCompa.get(companero);
-            //si el compañero no uso ninguna tecnica o las que uso no tienen la tecnica que se quiere, directamente va a return true
-            if (usadasPorCompa != null && usadasPorCompa.contains(tecnica)) 
-            {
-            	//si la uso pero no le quedan usos del torneo directamente va a return true
-                Integer usosCompa = companero.getTecnicas().get(tecnica);
-                if (usosCompa != null && usosCompa > 0) 
-                { //solo llega a dar falso si el compañero esta vivo, uso la tecnica y le quedan usos en el torneo
-                    return false;
-                }
-            }
-        }
-
-        return true;
+        return companero.estaFueraDeCombate()
+                || !registroUsosCompa.get(companero).contains(tecnica)
+                || companero.getUsosRestantes(tecnica) == 0;
     }
 
-    private Combatiente determinarObjetivoTecnica(Tecnica tecnica, Combatiente ejecutor, Pareja parejaRival) 
-    {
-        //si es defensiva o de cura, se devuelve a si mismo
-        if (tecnica.getTipo() == TipoTecnica.DEFENSIVA || tecnica.getTipo() == TipoTecnica.CURACION) 
-        {
-            return ejecutor;
-        }
-        return elegirObjetivoRival(parejaRival);
-    }
-
-    private Combatiente elegirObjetivoRival(Pareja parejaRival) 
-    {
-        //elige al rival de menos vida, si empatan al de menor id
+    private Combatiente elegirObjetivoRival(Pareja rival) {
         Combatiente elegido = null;
-        for (Combatiente rival : obtenerIntegrantesOrdenadosPorId(parejaRival)) 
-        {
-            if (!rival.estaFueraDeCombate()) //si esta fuera de combate no lo puede elegir
-            {
-            	//si es el primero en revisar lo elige,
-            	//si el actual tiene menos vida que el ya elegido elige ese
-                if (elegido == null || rival.getVidaAct() < elegido.getVidaAct()) 
-                {
-                    elegido = rival;
-                }
+        for (Combatiente candidato : obtenerIntegrantesOrdenadosPorId(rival)) {
+            if (!candidato.estaFueraDeCombate()
+                    && (elegido == null || candidato.getVidaAct() < elegido.getVidaAct())) {
+                elegido = candidato;
             }
         }
         return elegido;
     }
 
-    private Pareja determinarGanadora() 
-    {
-        if (pareja1.estaDerrotada()) return pareja2;
-        if (pareja2.estaDerrotada()) return pareja1;
-
-        //si se llego al limite de rondas, se elige la de mayor vida total, si empatan, la de menor id
-        int vidaTotal1 = pareja1.getVidaTotal();
-        int vidaTotal2 = pareja2.getVidaTotal();
-
-        if (vidaTotal1 > vidaTotal2) 
-        	return pareja1;
-        if (vidaTotal2 > vidaTotal1) 
-        	return pareja2;
-
-        if(pareja1.getID() > pareja2.getID())
-        	return pareja2;
-        return pareja1;
+    private Pareja determinarGanadora() {
+        if (pareja1.estaDerrotada())
+            return pareja2;
+        if (pareja2.estaDerrotada())
+            return pareja1;
+        if (pareja1.getVidaTotal() > pareja2.getVidaTotal())
+            return pareja1;
+        if (pareja1.getVidaTotal() < pareja2.getVidaTotal())
+            return pareja2;
+        if (pareja1.getID() < pareja2.getID())
+            return pareja1;
+        return pareja2;
     }
 
-    private List<Combatiente> obtenerTodosLosCombatientes() 
-    {
-        List<Combatiente> todos = new ArrayList<>();
-        todos.add(pareja1.getCombatiente1());
-        todos.add(pareja1.getCombatiente2());
-        todos.add(pareja2.getCombatiente1());
-        todos.add(pareja2.getCombatiente2());
-        return todos;
+    private List<Combatiente> obtenerTodosLosCombatientes() {
+        return List.of(pareja1.getCombatiente1(), pareja1.getCombatiente2(),
+                pareja2.getCombatiente1(), pareja2.getCombatiente2());
     }
 
-    private List<Combatiente> obtenerIntegrantesOrdenadosPorId(Pareja pareja) 
-    {
-        List<Combatiente> lista = new ArrayList<>();
-        lista.add(pareja.getCombatiente1());
-        lista.add(pareja.getCombatiente2());
-        lista.sort(null); //combatiente ya compara por id
-        return lista;
+    private List<Combatiente> obtenerIntegrantesOrdenadosPorId(Pareja pareja) {
+        Combatiente primero = pareja.getCombatiente1();
+        Combatiente segundo = pareja.getCombatiente2();
+        if (primero.compareTo(segundo) < 0)
+            return List.of(primero, segundo);
+        return List.of(segundo, primero);
     }
 
-    private Combatiente obtenerCompanero(Combatiente ejecutor, Pareja pareja) 
-    {
-    	//si tengo el 1, dame el 2, sino dame el 1
-    	if(pareja.getCombatiente1().equals(ejecutor))
-    		return pareja.getCombatiente2();
-    	
+    private Combatiente obtenerCompanero(Combatiente ejecutor, Pareja pareja) {
+        if (ejecutor.equals(pareja.getCombatiente1()))
+            return pareja.getCombatiente2();
         return pareja.getCombatiente1();
     }
 }

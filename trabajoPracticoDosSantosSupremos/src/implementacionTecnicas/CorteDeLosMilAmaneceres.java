@@ -12,9 +12,9 @@ public class CorteDeLosMilAmaneceres extends Tecnica
 		super("Corte de los mil amaneceres", 20, TipoTecnica.OFENSIVA);
 	}
 	@Override
-	public void ejecutar(Combatiente ejecutor, Combatiente objetivo) 
+	protected void aplicar(Combatiente ejecutor, Combatiente objetivo)
 	{
-		ejecutor.gastarEnergia(this.getCostoEnergia());
+
 		int dano = ejecutor.calcularDanoRealizado(45);
 		objetivo.recibirDano(dano);
 	}
