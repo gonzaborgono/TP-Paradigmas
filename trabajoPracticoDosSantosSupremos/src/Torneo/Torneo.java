@@ -2,119 +2,74 @@ package Torneo;
 
 import combatiente.Combatiente;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-public class Torneo 
-{
+public class Torneo {
     public static final int MIN_PAREJAS = 4;
     public static final int MAX_PAREJAS = 8;
 
-    private final List<Pareja> parejas;
-    private final List<ObservadorTorneo> observadores;
+    private final List<Pareja> parejas = new ArrayList<>();
+    private final Set<Combatiente> inscriptos = new HashSet<>();
+    private final List<ObservadorTorneo> observadores = new ArrayList<>();
     private boolean iniciado;
 
-    public Torneo() 
-    {
-        this.parejas = new ArrayList<>();
-        this.observadores = new ArrayList<>();
-        this.iniciado = false;
-    }
-
-    public void registrarObservador(ObservadorTorneo observador) 
-    {
-        if (observador == null) 
-        {
+    public void registrarObservador(ObservadorTorneo observador) {
+        if (observador == null)
             throw new IllegalArgumentException("El observador no puede ser nulo.");
-        }
-        if (!this.observadores.contains(observador)) 
-        {
-            this.observadores.add(observador);
-        }
+        if (!observadores.contains(observador))
+            observadores.add(observador);
     }
 
-    public void inscribir(Pareja pareja) 
-    {
-        if (this.iniciado) 
-        {
-            throw new IllegalStateException("No se pueden inscribir parejas una vez iniciado el torneo.");
-        }
-        if (pareja == null) 
-        {
+    public void inscribir(Pareja pareja) {
+        if (iniciado)
+            throw new IllegalStateException("El torneo ya empezó.");
+        if (pareja == null)
             throw new IllegalArgumentException("La pareja no puede ser nula.");
-        }
-        if (this.parejas.size() >= MAX_PAREJAS) 
-        {
-            throw new IllegalStateException("El torneo admite como máximo " + MAX_PAREJAS + " parejas.");
-        }
-        if (this.parejas.contains(pareja)) 
-        {
-            throw new IllegalArgumentException("La pareja ya se encuentra registrada en el torneo.");
-        }
+        if (parejas.contains(pareja))
+            throw new IllegalArgumentException("La pareja ya está inscripta.");
 
-        Combatiente nuevo1 = pareja.getCombatiente1();
-        Combatiente nuevo2 = pareja.getCombatiente2();
+        Combatiente primero = pareja.getCombatiente1();
+        Combatiente segundo = pareja.getCombatiente2();
+        if (inscriptos.contains(primero) || inscriptos.contains(segundo))
+            throw new IllegalArgumentException("Un combatiente ya está inscripto en otra pareja.");
+        if (parejas.size() >= MAX_PAREJAS)
+            throw new IllegalStateException("El torneo admite como máximo ocho parejas.");
 
-        for (Pareja p : this.parejas) 
-        {
-            if (p.getCombatiente1().equals(nuevo1) || p.getCombatiente2().equals(nuevo1) ||
-                p.getCombatiente1().equals(nuevo2) || p.getCombatiente2().equals(nuevo2) ) 
-            {
-                throw new IllegalArgumentException("Uno o ambos combatientes ya están inscriptos en otra pareja.");
-            }
-        }
-
-        this.parejas.add(pareja);
+        parejas.add(pareja);
+        inscriptos.add(primero);
+        inscriptos.add(segundo);
     }
 
-    public Pareja iniciar() 
-    {
-        int cantParejas = this.parejas.size();
-        if (cantParejas != MIN_PAREJAS && cantParejas != MAX_PAREJAS) 
-        {
-            throw new IllegalStateException("El torneo solo puede iniciar con 4 u 8 parejas inscriptas.");
-        }
-        if (this.iniciado) 
-        {
+    public Pareja iniciar() {
+        if (iniciado)
             throw new IllegalStateException("El torneo ya fue iniciado.");
+        if (parejas.size() != MIN_PAREJAS && parejas.size() != MAX_PAREJAS)
+            throw new IllegalStateException("El torneo solo puede iniciar con 4 u 8 parejas.");
+
+        iniciado = true;
+        for (Combatiente combatiente : inscriptos) {
+            combatiente.reiniciarUsosTecnicas();
         }
 
-        this.iniciado = true;
-
-        //copiar lista para no borrar original
-        List<Pareja> rondaActual = new ArrayList<>(this.parejas);
+        List<Pareja> rondaActual = new ArrayList<>(parejas);
         int ronda = 1;
-        //mete en siguienteRonda la pareja que gana el combate, dps toma de este array para hacer el combate
-        while (rondaActual.size() > 1) 
-        {
+        while (rondaActual.size() > 1) {
             List<Pareja> siguienteRonda = new ArrayList<>();
-            
-            //avanzamos de a 2 para hacer cruces de a 2, tipo 0 y 1, dps 2 y 3
-            for (int i = 0; i < rondaActual.size(); i += 2) 
-            {
-                Pareja pareja1 = rondaActual.get(i);
-                Pareja pareja2 = rondaActual.get(i + 1);
-
-                Combate combate = new Combate(ronda, pareja1, pareja2, this.observadores);
-                Pareja ganadora = combate.desarrollarCombate();
-                ronda++;
-                siguienteRonda.add(ganadora);
+            for (int i = 0; i < rondaActual.size(); i += 2) {
+                Combate combate = new Combate(ronda, rondaActual.get(i), rondaActual.get(i + 1), observadores);
+                siguienteRonda.add(combate.desarrollarCombate());
             }
-
             rondaActual = siguienteRonda;
+            ronda++;
         }
 
         Pareja campeona = rondaActual.get(0);
-        notificarProclamacion(campeona);
-
-        return campeona;
-    }
-
-
-    private void notificarProclamacion(Pareja campeona) 
-    {
-        for (ObservadorTorneo o : observadores)
-        {
-            o.recibirEvento(new EventoProclamacion(campeona));
+        Evento proclamacion = new EventoProclamacion(campeona);
+        for (ObservadorTorneo observador : List.copyOf(observadores)) {
+            observador.recibirEvento(proclamacion);
         }
+        return campeona;
     }
 }

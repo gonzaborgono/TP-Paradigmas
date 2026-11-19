@@ -3,9 +3,9 @@ import Torneo.Pareja;
 //esta default para que tengan acceso solo desde el paquete (osea solo el cronista)
 class RegistroFinal implements Comparable<RegistroFinal>
 {
-    private Pareja pareja;
-    private int ultimaRonda;
-    private int vidaFinal;
+    private final Pareja pareja;
+    private final int ultimaRonda;
+    private final int vidaFinal;
 
     RegistroFinal(Pareja pareja, int ultimaRonda, int vidaFinal) 
     {
@@ -23,9 +23,9 @@ class RegistroFinal implements Comparable<RegistroFinal>
         combate y luego por identificador.
          */
         if(this.ultimaRonda != otro.ultimaRonda)
-            return Integer.compare(this.ultimaRonda, otro.ultimaRonda);
+            return Integer.compare(otro.ultimaRonda, this.ultimaRonda);
         if(this.vidaFinal != otro.vidaFinal)
-            return Integer.compare(this.vidaFinal, otro.vidaFinal);
+            return Integer.compare(otro.vidaFinal, this.vidaFinal);
         return Integer.compare(this.pareja.getID(), otro.pareja.getID());
     }
     public Pareja getPareja()

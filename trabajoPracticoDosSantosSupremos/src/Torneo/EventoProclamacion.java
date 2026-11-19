@@ -2,10 +2,10 @@ package Torneo;
 
 public class EventoProclamacion extends Evento
 {
-    private Pareja campeona;
+    private final Pareja campeona;
     public EventoProclamacion(Pareja campeona)
     {
-        super("La pareja campeona del torneo es: " + campeona);
+        super("Los Dos Santos Supremos son los integrantes de " + campeona);
         this.campeona = campeona;
     }
     public Pareja getCampeona()

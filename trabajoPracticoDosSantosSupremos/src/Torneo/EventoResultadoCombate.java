@@ -2,11 +2,11 @@ package Torneo;
 
 public class EventoResultadoCombate extends Evento
 {
-    private Pareja ganadora;
-    private Pareja perdedora;
-    private int vidaParejaGanadora;
-    private int vidaParejaPerdedora;
-    private int ronda;
+    private final Pareja ganadora;
+    private final Pareja perdedora;
+    private final int vidaParejaGanadora;
+    private final int vidaParejaPerdedora;
+    private final int ronda;
     public EventoResultadoCombate(int ronda, Pareja ganadora, Pareja perdedora, int vidaParejaGanadora, int vidaParejaPerdedora)
     {
         super("El combate de la ronda " + ronda + " ha finalizado. La pareja ganadora es: " + ganadora + " con " + vidaParejaGanadora + " de vida restante. La pareja perdedora es: " + perdedora + " con " + vidaParejaPerdedora + " de vida restante.");
