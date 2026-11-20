@@ -4,7 +4,7 @@ TP 2 de Paradigmas de Programación. El programa simula un torneo eliminatorio p
 
 ## Cómo ejecutar en Eclipse
 
-1. Con un JDK 17 o superior, importá la carpeta `TP-Paradigmas` desde **File → Import → General → Existing Projects into Workspace**.
+1. Con un JDK 17 o superior, importá la carpeta `TP-Paradigmas` desde **File → Import → General → Existing Projects into Workspace**. Si Eclipse detecta también la subcarpeta `trabajoPracticoDosSantosSupremos` como proyecto, seleccioná solo `TP-Paradigmas`.
 2. Abrí `TorneoDeLosInmortales.java` y elegí **Run As → Java Application**. Sin argumentos usa cuatro parejas. Para probar ocho, agregá `8` en **Run Configurations → Arguments → Program arguments**.
 3. Para ejecutar las 33 pruebas juntas, hacé clic derecho en la carpeta `test` y elegí **Run As → JUnit Test**. También podés ejecutar cada clase de prueba por separado. JUnit 5 está incluido en la configuración del proyecto de Eclipse.
 
